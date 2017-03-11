@@ -26,7 +26,10 @@ class Cut_Finder(object):
         nx.set_edge_attributes(self.G, 'capacity', edge_capacities)        
     
     def find_cutset(self, in1, in2):
-        _, (reachable, non_reachable) = nx.minimum_cut(self.G, in1*2+1, in2*2)
+        try:
+            _, (reachable, non_reachable) = nx.minimum_cut(self.G, in1*2+1, in2*2)
+        except nx.NetworkXUnbounded:
+            print('unbounded flow for nodes %d and %d'%(in1, in2))
         cutset = set()
         for u, nbrs in ((n, self.G[n]) for n in reachable):
             cutset.update((u, v) for v in nbrs if v in non_reachable)
