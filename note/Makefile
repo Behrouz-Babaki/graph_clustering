@@ -15,6 +15,7 @@ $(NAME).pdf : $(NAME).tex $(REFNAME).bib $(REST)
 	pdflatex $(NAME).tex
 
 clean:
-	@rm -rf auto *~ *.aux *.log *.blg *.bbl \
+	@rm -rf auto *~ *.aux \
+	*.log *.blg *.bbl *.synctex.gz \
 	$(NAME).pdf $(NAME).out \
 	examples.pdf

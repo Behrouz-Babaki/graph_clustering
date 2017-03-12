@@ -1,8 +1,10 @@
 \documentclass[]{article}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{amssymb,amsmath}
+\usepackage{amssymb,amsmath,amsthm}
 \usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{fixltx2e} % provides \textsubscript
 \usepackage[unicode=true]{hyperref}
 \hypersetup{breaklinks=true,
@@ -18,7 +20,7 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
-%\setcounter{secnumdepth}{0}
+\newtheorem{theorem}{Theorem}
 
 \begin{document}
 
@@ -50,7 +52,7 @@ further improvement.
 
 Consider an undirected graph $G(V, E)$. Our goal is to partition $V$
 into $k$ subsets (called \emph{clusters} from now on), such that the
-subgrah induced by each subset is connected. Our preference is to avoid
+subgraph induced by each subset is connected. Our preference is to avoid
 having clusters that contain only a small number of vertices. To enforce
 this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
@@ -104,34 +106,32 @@ s \leq \sum_{i=1}^{|V|} x_{ij} \quad \forall i \in \{1, \ldots, k\}
 
 Our formulation so far does not ensure that the vertices in each cluster
 are connected. For now assume that constraint
-$connected(x_{i1}, \ldots, x_{i|V|})$ enforces the connectivity of
-clsuter $i$. We will discuss the exact formulation of this constraint in
+$\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ enforces the connectivity of
+cluster $i$. We will discuss the exact formulation of this constraint in
 the next section. The model that we defined in this section is presented
 below:
 
 \begin{align}
-&\max s + \gamma \sum_{i=1}^{k} \sum_{(w, u, v) \in C} w y_{iuv} \\
-&\textit{s.t.} \\
-& \sum_{i=1}^k x_{ij} = 1 \quad \forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \geq x_{iu} + x_{iv} -1 \quad \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
-&s \leq \sum_{i=1}^{|V|} x_{ij} \quad \forall i \in \{1, \ldots, k\} \\
-& connected(x_{i1}, \ldots, x_{i|V|}) \quad \forall i \in \{1, \ldots, k\} \\
-& x_{ij} \ in \{0, 1\} \quad \forall i \in \{1, \ldots, k\}, \forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \in \{0, 1\} \quad \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+&\text{maximize} \quad s + \gamma \sum_{i=1}^{k} \sum_{(w, u, v) \in C} w y_{iuv} & \\
+&\textit{s.t.} & \nonumber \\
+& \sum_{i=1}^k x_{ij} = 1 \quad &\forall j \in \{1, \ldots, |V|\} \\
+& y_{iuv} \geq x_{iu} + x_{iv} -1 \quad &\forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+&s \leq \sum_{i=1}^{|V|} x_{ij} \quad &\forall i \in \{1, \ldots, k\} \\
+& \mathsf{connected}(x_{i1}, \ldots, x_{i|V|}) \quad &\forall i \in \{1, \ldots, k\} \\
+& x_{ij} \in \{0, 1\} \quad &\forall i \in \{1, \ldots, k\}, \forall j \in \{1, \ldots, |V|\} \\
+& y_{iuv} \in \{0, 1\} \quad &\forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
 & s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}
 \end{align}
 
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
-In the previous section we did not give a concrete formulation for the
-$connected(x_{i1}, \ldots, x_{i|V|})$ constraint. In this section we
-present a method for enforcing this constraint. The contents of this
+In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint. The contents of this
 section are a slight modification of the methods presented in~\citet{CarvajalCGVW13}.
 
 This formulation adds an exponential number of inequalities to the
 problem, which makes it impractical for all graphs but those with only a
-few vertices. To resolve this probelm, we use the \emph{cutting-plane}
+few vertices. To resolve this problem, we use the \emph{cutting-plane}
 method. A rough description of this method follows: We start by
 including a (possibly empty) subset of these constraints and solve the
 problem to optimality. The we check to see if the solution satisfies the
@@ -144,7 +144,7 @@ Note that we need a means to detect which constraints are violated by
 the current solution. Since we do not want to enumerate an exponential
 number of constraints, this question gives rise to another search
 problem (called the \emph{separation} problem). The separation problem
-is usually formulated as that of finding the \emph{most-violated}
+is usually formulated as that of finding the \emph{most violated}
 constraint.
 
 Luckily, for the connectivity constraints, the separation problem can be
@@ -161,13 +161,30 @@ If no such violated constraint is found, then the solution is optimal.
 The question is now how to find $S^*$, the minimum node cut separating
 $u$ and $v$. We use the following theorem to solve this problem:
 
-Theorem: Given a graph with node capacities, the maximum flow between
+\begin{theorem}
+Given a graph with node capacities, the maximum flow between
 two non-adjacent nodes $u$ and $v$ equals the capacity of the minimum
 capacity node cut separating $u$ and $v$.
+\end{theorem}
 
 To solve the separation problem, we solve a max-flow problem for each
 pair of non-adjacent nodes using $z^*_i$ as node capacities. We repeat
 this $k$ times, once for every cluster.
+
+\begin{algorithm}
+\begin{algorithmic}
+\State $\mathcal{C} \gets \emptyset$
+\For{$i \in \{1, \ldots, k\}$}
+	\For{$u, v$ such that $(u, v) \notin E$}
+		\State $S^* \gets \text{min-cut}(u, v, z^{*i})$
+		\If{$\sum_{w \in S^*} z^{*i}_w < z^{*i}_u + z^{*i}_v - 1$}
+			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} z_w \geq z_u + z_v - 1\}$
+		\EndIf
+	\EndFor
+\EndFor
+\State Add constraints $\mathcal{C}$ to the model
+\end{algorithmic}
+\end{algorithm}
 
 Now observe that we do not need to wait for the problem to be solved to
 optimality to add the violated constraints. Instead, we can do so each
@@ -182,7 +199,7 @@ practices in our implementation.
 We implemented our branch-and-cut algorithm using the python interface
 of \emph{Gurobi 6.5}. To solve the separation problem, we used the
 implementation of min-cut/max-flow algorithm from the \emph{NetworkX
-1.10} library. To use this implementation for our problem, we replaced
+1.11} library. To use this implementation for our problem, we replaced
 each undirected edge by two opposite directed edges. The capacity of
 these edges is infinite. Then we replaced each vertex $x$ by two
 vertices $x_{\text{in}}, x_{\text{out}}$ connected by two opposite
