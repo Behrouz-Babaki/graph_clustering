@@ -1,6 +1,6 @@
 .PHONY: clean all exmaples
 
-NAME = 	note
+NAME = 	graph_clustering
 REFNAME = references
 
 
@@ -17,5 +17,4 @@ $(NAME).pdf : $(NAME).tex $(REFNAME).bib $(REST)
 clean:
 	@rm -rf auto *~ *.aux \
 	*.log *.blg *.bbl *.synctex.gz \
-	$(NAME).pdf $(NAME).out \
-	examples.pdf
+	$(NAME).pdf $(NAME).out 
