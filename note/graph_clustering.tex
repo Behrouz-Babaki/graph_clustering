@@ -22,6 +22,7 @@
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
 
 \begin{document}
 
@@ -43,10 +44,8 @@ constraints will be formulated. In section~\ref{sec:connectivity} we
 introduce a formulation for the connectivity constraints. This
 formulation involves an exponential number of constraints. We then
 present a method for adding only a sufficient subset of these
-constraints to the model. In section~\ref{sec:implementation} we
-discuss the implementation details. We conclude the note in
-section~\ref{sec:improvement} by mentioning some possibilities for
-further improvement.
+constraints to the model. We conclude this note in section~\ref{sec:implementation} after 
+discussing some of the implementation details.
 
 \section{Probelm definition}
 \label{sec:definition}
@@ -128,12 +127,28 @@ below:
 \label{sec:connectivity}
 
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint. The contents of this
-section are a slight modification of the methods presented in~\citet{CarvajalCGVW13}.
+section are a slight modification of the methods presented in~\citet{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
+
+\begin{definition}[Node-cut set]
+Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
+\end{definition}
+
+Figure~\ref{fig:nodecut} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
+
+\begin{theorem}
+Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
+\end{theorem}
+
+Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ can be formulated as follows:
+
+\begin{equation}
+\sum_{w \in S} x_{iw} \geq x_{iu} + x_{iv} - 1 \qquad \forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
+\end{equation}
 
 \begin{figure}
 \centering
 \includegraphics{node_cut}
-\caption{Each path between $u$ and $v$ passes through $S$\label{fig:nodecut}}
+\caption{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$\label{fig:nodecut}}
 \end{figure}
 
 This formulation adds an exponential number of inequalities to the
@@ -204,13 +219,12 @@ practices in our implementation.
 \label{sec:implementation}
 
 We implemented our branch-and-cut algorithm using the python interface
-of \emph{Gurobi 6.5}. To solve the separation problem, we used the
-implementation of min-cut/max-flow algorithm from the \emph{NetworkX
-1.11} library. To use this implementation for our problem, we replaced
+of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the
+implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11}\footnote{networkx.github.io} library. To use this implementation for our problem, we replaced
 each undirected edge by two opposite directed edges. The capacity of
-these edges is infinite. Then we replaced each vertex $x$ by two
-vertices $x_{\text{in}}, x_{\text{out}}$ connected by two opposite
-edges, with capacities equal to the capacity of $x$. We obtain the
+these edges is infinite. Then we replaced each vertex $v$ by two
+vertices $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
+edges, with capacities equal to the capacity of $v$. We obtain the
 minimum node cut separating $u$ and $v$ by computing the minimum cut
 between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 
@@ -221,8 +235,6 @@ the value of objective function, and stopped adding the cuts if this
 value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
-
-\section{Further improvements}\label{sec:improvement}
 
 \bibliographystyle{plainnat}
 \bibliography{references}
