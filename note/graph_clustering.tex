@@ -7,7 +7,6 @@
 \usepackage{algpseudocode}
 \usepackage{graphicx}
 \usepackage{caption}
-\usepackage{subcaption}
 \usepackage{fixltx2e} % provides \textsubscript
 \usepackage[unicode=true]{hyperref}
 \hypersetup{breaklinks=true,
@@ -59,8 +58,7 @@ having clusters that contain only a small number of vertices. To enforce
 this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
 $C = \{(u, v, w): u, v \in V, w \in \mathbb{R}^+\}$ which indicates that
-including $u$ and $v$ in the same cluster will induce a penalty of $w$.
-Our second goal is to minimize the sum of such penalties.
+including $u$ and $v$ in the same cluster will induce a penalty of $w$. We denote all edges $(u, v)$ such that $(u, v, w) \in C$ by $E_C$. Our second goal is to minimize the sum of such penalties.
 
 To include both goals in the objective function, assume that $S$ is the
 size of the smallest clsuter and $W$ is the total penalty. We define the
@@ -150,15 +148,17 @@ Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then 
 
 \begin{figure}
 \centering
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.55\textwidth}
 \centering
-\includegraphics[scale=0.8]{node_cut}
+\includegraphics[scale=0.7]{node_cut}
+\captionsetup{font=small,margin=10pt}
 \captionof{figure}{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
 \label{fig:nodecut}
 \end{minipage}%
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.45\textwidth}
 \centering
 \includegraphics[scale=0.8]{minimal}
+\captionsetup{font=small, margin=10pt}
 \captionof{figure}{The set \{3, 4\} belongs to $\Gamma(2, 5)$, but the set \{1, 3, 4\} does not.}
 \label{fig:minimal}
 \end{minipage}
@@ -200,16 +200,19 @@ capacity node cut separating $u$ and $v$.
 \end{theorem}
 
 To solve the separation problem, we solve a max-flow problem for each
-pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat this $k$ times, once for every cluster.
+pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat this $k$ times, once for every cluster. This procedure is summarized in algorithm~\ref{alg:cut}.
 
 \begin{algorithm}
+\centering
+\caption{The cut-generation procedure}
+\label{alg:cut}
 \begin{algorithmic}
 \State $\mathcal{C} \gets \emptyset$
 \For{$i \in \{1, \ldots, k\}$}
 	\For{$u, v$ such that $(u, v) \notin E$}
-		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$
+		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$ \Comment Find the minimum $uv$-node cut
 		\If{$\sum_{w \in S^*} x_{iw}^* < z_{iu}^* + z_{iv}^* - 1$}
-			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$
+			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$ \Comment violated constraint
 		\EndIf
 	\EndFor
 \EndFor
