@@ -7,22 +7,25 @@ from gurobipy import Model, GRB, quicksum, LinExpr, GurobiError
 
 class Cut_Finder(object):
     def __init__(self, ingraph_nnodes, ingraph_edges):
-        G = nx.Graph()
+        G = nx.DiGraph()
         G.add_nodes_from(range(2*ingraph_nnodes))
 
         for i in range(ingraph_nnodes):
             G.add_edge(2*i, 2*i+1)
+            G.add_edge(2*i+1, 2*i)
 
         for v1, v2 in ingraph_edges:
             G.add_edge(v1*2+1, v2*2) 
+            G.add_edge(v2*2+1, v1*2)
         
         self.G = G
         self.in_nodes = ingraph_nnodes
         self.in_edges = set(ingraph_edges)
-        self.capacity_edges = [(2*i, 2*i+1) for i in range(ingraph_nnodes)]  
+        self.capacity_edges =  [(2*i, 2*i+1) for i in range(ingraph_nnodes)]
+        self.capacity_edges += [(2*i+1, 2*i) for i in range(ingraph_nnodes)]
         
     def update_capacities(self, ingraph_capacities):
-        edge_capacities = dict(zip(self.capacity_edges, ingraph_capacities))
+        edge_capacities = dict(zip(self.capacity_edges, ingraph_capacities * 2))
         nx.set_edge_attributes(self.G, 'capacity', edge_capacities)        
     
     def find_cutset(self, in1, in2):
@@ -152,7 +155,7 @@ class Clustering_Model(object):
         for i in range(self.k):
             cluster = []
             for j in range(self.n_vertices):
-                if self.model._vars[i][j].x == 1:
+                if abs(self.model._vars[i][j].x) > 1e-4:
                     cluster.append(j)
             clusters.append(cluster)
         return clusters
