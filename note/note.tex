@@ -5,6 +5,7 @@
 \usepackage{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{graphicx}
 \usepackage{fixltx2e} % provides \textsubscript
 \usepackage[unicode=true]{hyperref}
 \hypersetup{breaklinks=true,
@@ -128,6 +129,12 @@ below:
 
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint. The contents of this
 section are a slight modification of the methods presented in~\citet{CarvajalCGVW13}.
+
+\begin{figure}
+\centering
+\includegraphics{node_cut}
+\caption{Each path between $u$ and $v$ passes through $S$\label{fig:nodecut}}
+\end{figure}
 
 This formulation adds an exponential number of inequalities to the
 problem, which makes it impractical for all graphs but those with only a
