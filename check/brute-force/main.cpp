@@ -1,40 +1,46 @@
 #include <iostream>
-#include <deque>
+#include <vector>
+
+#include "bf_checker.hpp"
 
 using std::endl;
 using std::cout;
 using std::cin;
-using std::deque;
+using std::vector;
 
-void bf(int n, int k);
 
 int main(void) {
-
-  bf(3, 4);
+  vector< vector < int > > graph;
+  vector< int > node;
+    
+  // node 0
+  node.push_back(1);
+  node.push_back(2);
+  node.push_back(3);
+  graph.push_back(node);
+  
+  // node 1
+  node.clear();
+  node.push_back(0);
+  graph.push_back(node);
+  
+  // node 2
+  node.clear();
+  node.push_back(0);
+  node.push_back(3);
+  graph.push_back(node);
+  
+  // node 3
+  node.clear();
+  node.push_back(2);
+  graph.push_back(node);
+  
+  vector< vector < int > > constraints;
+  double gamma = 0.5;
+  int k = 2;
+  BF_Checker bf(graph, constraints, k, gamma);
+  cout << bf.is_feasible() << " " << bf.get_best() << endl;
   return 0;
 
 }
 
-void bf(int n, int k) {
-  deque<int> s;
-  do {
-    // fill the rest with zero
-    while(s.size() < n)
-      s.push_back(0);
-    
-    // This is the solution
-    for (auto e : s)
-      cout << e << " ";
-    cout << endl;
-    
-    int t = s.back();
-    s.pop_back();
-    while (!s.empty() && t == k-1) {
-      t = s.back();
-      s.pop_back();
-    }
-    
-    if (t<k-1)
-      s.push_back(t + 1);
-  } while (!s.empty());
-}
