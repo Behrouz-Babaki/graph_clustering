@@ -1,15 +1,13 @@
 #include <deque>
-#include <stack>
 #include <vector>
 
-#include "bf_checker.hpp"
+#include "bfcheck.hpp"
 
 using std::deque;
-using std::stack;
 using std::vector;
 
   BF_Checker::BF_Checker(vector< vector < int > > graph, 
-	     vector< vector< int > > constraints, 
+	     vector< vector< double > > constraints, 
 	     int k, double gamma): _graph(graph), 
 	     _constraints(constraints), _gamma(gamma) {
 	       
@@ -58,7 +56,7 @@ using std::vector;
 	all_connected &= is_connected(clusters[i]);
       
       if(all_connected) {
-	double value = min_size + _gamma * get_penalty(s);
+	double value = min_size - _gamma * get_penalty(s);
 	if (_first) {
 	  _best = value;
 	  _feasible = true;
@@ -84,18 +82,20 @@ using std::vector;
     int n = cluster.size();
     _visited.assign(n, false);
     
-    stack<int> s;
+    deque<int> s;
     for(int i=0; s.empty() && i<n; i++)
       if (cluster[i])
-	s.push(i);
+	s.push_back(i);
     
     while(!s.empty()){
-      int u = s.top();
-      s.pop();
+      int u = s.back();
+      s.pop_back();
       _visited[u] = true;
-      for (auto v : _graph[u])
+      for (int i=0, sz=_graph[u].size(); i<sz; i++) {
+        int v  = _graph[u][i];
 	if (cluster[v] and !_visited[v])
-	  s.push(v);
+	  s.push_back(v);
+      }
     }
     
     bool connected = true;
@@ -108,10 +108,10 @@ using std::vector;
   
   double BF_Checker::get_penalty(const deque<int>& clusters) {
     double penalty = 0;
-    for (auto constraint : _constraints) {
-      int first = constraint[0];
-      int second = constraint[1];
-      double weight = constraint[2];
+    for (int i=0, sz=_constraints.size(); i<sz; i++) {
+      int first = _constraints[i][0];
+      int second = _constraints[i][1];
+      double weight = _constraints[i][2];
       if (clusters[first] == clusters[second])
 	penalty += weight;
     }

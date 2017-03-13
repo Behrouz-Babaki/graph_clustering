@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "bf_checker.hpp"
+#include "bfcheck.hpp"
 
 using std::endl;
 using std::cout;
@@ -35,7 +35,7 @@ int main(void) {
   node.push_back(2);
   graph.push_back(node);
   
-  vector< vector < int > > constraints;
+  vector< vector < double > > constraints;
   double gamma = 0.5;
   int k = 2;
   BF_Checker bf(graph, constraints, k, gamma);

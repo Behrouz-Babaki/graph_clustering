@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BFCHECK_HPP
+#define _BFCHECK_HPP
 
 #include <deque>
 #include <vector>
@@ -10,7 +11,7 @@ class BF_Checker {
   
 public:
   BF_Checker(vector< vector < int > > graph, 
-	     vector< vector< int > > constraints, 
+	     vector< vector< double > > constraints, 
 	     int k, double gamma);
   bool is_feasible(void);
   double get_best(void);
@@ -18,7 +19,7 @@ public:
 private:
     
   vector< vector< int > > _graph;
-  vector< vector< int > > _constraints;
+  vector< vector< double > > _constraints;
   vector< bool > _visited;
   double _gamma;
   bool _feasible;
@@ -30,3 +31,5 @@ private:
   double get_penalty(const deque<int>& clusters);
 
 };
+
+#endif //_BFCHECK_HPP
