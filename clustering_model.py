@@ -151,13 +151,19 @@ class Clustering_Model(object):
         except GurobiError:
             print(GurobiError.message)
         
-        clusters = []
-        for i in range(self.k):
-            cluster = []
-            for j in range(self.n_vertices):
-                if abs(self.model._vars[i][j].x) > 1e-4:
-                    cluster.append(j)
-            clusters.append(cluster)
-        return clusters
+        self.objective = None
+        self.clusters = None
+        self.optimal = (self.model.Status == GRB.OPTIMAL)
+        self.runtime = self.model.Runtime
+        
+        if self.optimal:
+            self.objective = self.model.ObjVal
+            clusters = []
+            for i in range(self.k):
+                cluster = []
+                for j in range(self.n_vertices):
+                    if abs(self.model._vars[i][j].x) > 1e-4:
+                        cluster.append(j)
+                clusters.append(cluster)
 
 
