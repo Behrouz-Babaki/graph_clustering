@@ -211,7 +211,7 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \For{$i \in \{1, \ldots, k\}$}
 	\For{$u, v$ such that $(u, v) \notin E$}
 		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$ \Comment Find the minimum $uv$-node cut
-		\If{$\sum_{w \in S^*} x_{iw}^* < z_{iu}^* + z_{iv}^* - 1$}
+		\If{$\sum_{w \in S^*} x_{iw}^* < x_{iu}^* + x_{iv}^* - 1$}
 			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$ \Comment violated constraint
 		\EndIf
 	\EndFor
