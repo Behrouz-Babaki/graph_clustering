@@ -2,4 +2,8 @@ __pycache__/
 *.log
 .ipynb_checkpoints
 /release/
+.kdev4/
+*.kdev4
+*.o
+*~
 
