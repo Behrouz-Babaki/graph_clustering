@@ -7,9 +7,6 @@ MODULE = bfcheck
 
 all: swig
 
-main: bfcheck.o main.o
-	$(CXX) $(CXX_FLAGS) $^ -o $@
-
 %.o : %.cpp 
 	$(CXX) $(CXX_FLAGS) -c $< -o $@ $(IFLAGS)
 
@@ -26,6 +23,5 @@ clean:
 
 swig: _$(MODULE).so
 
-test: main _$(MODULE).so
-	@./main
+test: _$(MODULE).so
 	@python3 main.py
