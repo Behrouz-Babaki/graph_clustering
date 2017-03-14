@@ -5,7 +5,7 @@ Before importing the `comparison_utils` module, you have to build the code in th
 
 Description
 -----------
-The notebook `compare.ipynb` shows how to compare the results of the MIP solver and the brute-force algorithm on a instance. You just need to call the `compare` function (imported from `comparsion_utils`). It will make the necessary format conversions, calls the two algorithms and compares the results. 
+The notebook `compare.ipynb` shows how to compare the results of the MIP solver and the brute-force algorithm on an instance. You just need to call the `compare` function (imported from `comparsion_utils`). It will make the necessary format conversions, calls the two algorithms and compares the results. 
 
 These are the arguments of the function `compare(graph, constraints, k, gamma)`:
 - `graph`: a list of tuples. Each tuple is an edge. The vertices can be string, integer, or any other object that supports equality test. 
