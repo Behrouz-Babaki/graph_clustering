@@ -2,7 +2,7 @@
 
 CXX = g++
 CXX_FLAGS = -O2 -fPIC 
-IFLAGS = -I/usr/include/python3.5
+IFLAGS = -I/usr/include/python3.4
 MODULE = bfcheck
 
 all: swig
