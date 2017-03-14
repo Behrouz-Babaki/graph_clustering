@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../..')
+sys.path.append('../../clustering_model')
 sys.path.append('../brute-force')
 
 from bfcheck import BF_Checker
