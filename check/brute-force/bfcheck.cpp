@@ -84,17 +84,20 @@ using std::vector;
     
     deque<int> s;
     for(int i=0; s.empty() && i<n; i++)
-      if (cluster[i])
+      if (cluster[i]) {
 	s.push_back(i);
+	_visited[i] = true;
+       }
     
     while(!s.empty()){
       int u = s.back();
       s.pop_back();
-      _visited[u] = true;
       for (int i=0, sz=_graph[u].size(); i<sz; i++) {
         int v  = _graph[u][i];
-	if (cluster[v] and !_visited[v])
+	if (cluster[v] and !_visited[v]) {
 	  s.push_back(v);
+	  _visited[v] = true;
+	}
       }
     }
     
