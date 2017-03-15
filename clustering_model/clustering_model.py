@@ -85,7 +85,8 @@ def mincut_callback(model, where):
 
 
 class Clustering_Model(object):
-    def __init__(self, n_vertices, edges, constraints, k, gamma, verbosity=0):
+    def __init__(self, n_vertices, edges, constraints, k, gamma, 
+                 verbosity=0, symmetry_breaking=1):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.k = k
@@ -105,6 +106,13 @@ class Clustering_Model(object):
         # constraint: each vertex in exactly one cluster
         for v in range(n_vertices):
             model.addConstr(quicksum([mvars[i][v] for i in range(k)]), GRB.EQUAL, 1)
+            
+        # symmetry-breaking constraints
+        if symmetry_breaking == 1:
+            model.addConstr(mvars[0][0], GRB.EQUAL, 1)
+            for i in range(2, k):
+                model.addConstr(quicksum([mvars[i-1][j] for j in range(n_vertices)]) <=
+                                quicksum([mvars[i][j] for j in range(n_vertices)]))
         
         
         obj_expr = LinExpr()
@@ -165,5 +173,6 @@ class Clustering_Model(object):
                     if abs(self.model._vars[i][j].x) > 1e-4:
                         cluster.append(j)
                 clusters.append(cluster)
+            self.clusters = clusters
 
 

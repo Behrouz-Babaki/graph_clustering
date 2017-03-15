@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                                           '../data/graph_cannot_links.csv')
     cm = Clustering_Model(n_vertices, edges, 
                           constraints=constraints, 
-                          k=3, gamma=5, verbosity=1)
-    clusters = cm.solve()
-    print(clusters)
+                          k=3, gamma=5, verbosity=1, symmetry_breaking=1)
+    cm.solve()
+    print(cm.clusters)
 
