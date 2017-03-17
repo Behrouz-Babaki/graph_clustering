@@ -62,11 +62,14 @@ if __name__ == '__main__':
                         help='mip model to be used')
     parser.add_argument('--verbose', action='store_true', 
                         help='print detailed output')
+    parser.add_argument('--nosym', action='store_true',
+                        help='disable symmetry breaking')
     args = parser.parse_args()    
 
     n_vertices, edges, constraints, node_ids = read_graph(args.graph_file, 
                                                           args.cons_file)
-    verbosity = 1 if args.verbose else 0                                
+    verbosity = 1 if args.verbose else 0
+    sym = 0 if args.nosym else 1                            
     k = args.k
     gamma = args.gamma
     
@@ -74,12 +77,12 @@ if __name__ == '__main__':
         m = Bnc_Model(n_vertices, edges, 
                               constraints=constraints, 
                               k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=1)
+                              symmetry_breaking=sym)
     elif args.method == 'basic':
         m = Basic_Model(n_vertices, edges, 
                               constraints=constraints, 
                               k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=1)
+                              symmetry_breaking=sym)
     m.solve()
     print(m.clusters)
 
