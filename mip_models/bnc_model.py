@@ -84,7 +84,7 @@ def mincut_callback(model, where):
                 model.cbLazy(cutset_expr >= model._vars[i][u] + model._vars[i][v] - 1)
 
 
-class Clustering_Model(object):
+class Bnc_Model(object):
     def __init__(self, n_vertices, edges, constraints, k, gamma, 
                  verbosity=0, symmetry_breaking=1):
         self.check_graph(n_vertices, edges)
