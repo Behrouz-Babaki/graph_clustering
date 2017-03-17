@@ -5,7 +5,7 @@ OBJ_FILES := $(addprefix obj/, $(notdir $(CPP_FILES:.cpp=.o)))
 DEP_FILES := $(addprefix obj/, $(notdir $(CPP_FILES:.cpp=.dep)))
 
 CFLAGS+= -O3 -g -Wall -std=c++0x
-LDFLAGS = -std=c++0x
+LDFLAGS = -std=c++0x -g
 
 .PHONY: all clean main test
 
