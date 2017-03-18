@@ -6,7 +6,7 @@
 #include <cassert>
 #include <random>
 #include <utility>
-
+#include <functional>
 #include "reader.hpp"
 
 using std::cout;
@@ -18,6 +18,8 @@ using std::default_random_engine;
 using std::uniform_int_distribution;
 using std::pair;
 using std::make_pair;
+using std::greater;
+using std::priority_queue;
 
 int bfs(const vector< vector< int > >&,
         const vector< int >& ,
@@ -29,74 +31,113 @@ pair< int, int > furthest_points(const vector< vector< int > >&,
 
 void bisect( const vector< vector< int > >&, 
 		vector< int >&,
-		vector< vector< bool > >&,
 		vector< bool >&,
-		int, int, int, int, int);
+		int, int, int, int,
+		int&, int&);
+
+void partition(const vector< vector< int > >&, 
+	       vector< int >&, 
+	       vector< bool >&, int);
+
+void partition(const vector< vector< int > >& graph, 
+	       vector< int >& clusters, 
+	       vector< bool >& visited, 
+	       int num_clusters) {
+// partition the graph into num_clusters connected clusters
+  int n = graph.size();
+  clusters.assign(n, -1);
+  priority_queue< pair< int, int >, vector< pair< int, int > >, greater< pair< int, int > > > sizes;
+  sizes.push(make_pair(n, -1));
+  int j = 0;
+  for (int i=1; i<num_clusters; i++) {
+    int current_size, current_id;    
+    pair< int, int> cs = sizes.top();
+    current_size = cs.first;
+    current_id = cs.second;
+    sizes.pop();
+
+    int left_size, right_size;
+    bisect(graph, clusters, visited, current_id, current_size, 
+	   j, j+1, left_size, right_size);
+    sizes.push(make_pair(left_size, j));
+    sizes.push(make_pair(right_size, j+1));
+    j += 2;
+  }
+}
 
 void bisect( const vector< vector< int > >& graph, 
 		vector< int >& clusters,
-		vector< vector< bool > >& uv_visited,
 		vector< bool >& visited,
-		int current_cluster,
+		int current_id,
 		int current_size,
-		int cid_first, int cid_last) {
-  cout << "running bisect " << cid_first << " " << cid_last << endl;
+		int left_id, 
+		int right_id,
+		int& left_size,
+		int& right_size) {
+  
   pair< int, int > uv;
-  uv = furthest_points(graph, clusters, visited, current_cluster, current_size);
+  uv = furthest_points(graph, clusters, visited, current_id, current_size);
   int u = uv.first, v = uv.second;
   cout << "u :" << u << " v:" << v << endl;
   int n = graph.size();
   
-  uv_visited[0].assign(n, false);
-  uv_visited[1].assign(n, false);
-  vector< int > uv_first(2), uv_last(2);
-  uv_first[0] = cid_first;
-  uv_last[0] = ceil((cid_first + cid_last) / 2.0);
-  uv_first[1] = uv_last[0];
-  uv_last[1] = cid_last;
+  visited.assign(n, false);
+  visited[u] = true;
+  visited[v] = true;
   
-  // label the clusters by their first index
+  clusters[u] = left_id;
+  clusters[v] = right_id;
+  
   vector< int > uv_cluster(2);
-  uv_cluster[0] = uv_first[0];
-  uv_cluster[1] = uv_first[1];
+  uv_cluster[0] = left_id;
+  uv_cluster[1] = right_id;
 
   vector< int > uv_size(2, 1);
+
   vector< queue< int > > uv_q(2, queue< int >());
-  
-  uv_visited[0][u] = true;
   uv_q[0].push(u);
-  
-  uv_visited[1][v] = true;
   uv_q[1].push(v);
+  
+  vector< int > uv_edges(2);
+  vector< int > uv_edge_id(2, -1);
  
   int j = 0;
-  int node;
-
   for(int i=0; i<current_size; i++) {
-    //cout << "i: " << i << endl;
     bool found = false;
-      while (!found) {
-	node = uv_q[j].front();
-	//cout << "node:" << node << endl;
-	//cout << clusters[node] << " " << current_cluster << endl;
+    while (!found && !uv_q[j].empty()) {
+      // if index is -1, pop another node, update the uv_edges and index
+      if (uv_edge_id[j] == -1) {
+	uv_edges[j] = uv_q[j].front();
 	uv_q[j].pop();
-	if (clusters[node] == current_cluster) {
+	uv_edge_id[j] = 0;
+      }
+      
+      // iterate through the list until you find something or reach end
+      int k = uv_edge_id[j];
+      for (int s=graph[uv_edges[j]].size(); !found && k<s; k++) {
+	int node = graph[uv_edges[j]][k];
+      // if found, update flag, size, clusters, visited
+	if (clusters[node] == current_id && !visited[node]) {
+	  found = true;
+	  visited[node] = true;
 	  clusters[node] = uv_cluster[j];
 	  uv_size[j]++;
-	  found = true;
+	  uv_q[j].push(node);
+	  uv_edge_id[j] = k<s-1 ? k+1 : -1;
 	}
-	for (auto x : graph[node])
-	  if (!uv_visited[j][x]) {
-	    uv_visited[j][x] = true;
-	    uv_q[j].push(x);
-	  }
       }
-    j = 1-j;
+      // if you get to the end, set index to -1
+      if (!found)
+	uv_edge_id[j] = -1;
+    }
+
+    // change the turn only if the other one is not done
+    if (!uv_q[1-j].empty())
+      j = 1-j;
   }
   
-  for (int i=0; i<2; i++)
-    if (uv_last[i] > uv_first[i] + 1) 
-      bisect(graph, clusters, uv_visited, visited, uv_cluster[i],uv_size[i], uv_first[i], uv_last[i]);
+  left_size = uv_size[0];
+  right_size = uv_size[1];
 }
 
 pair< int, int > furthest_points(const vector< vector< int > >& graph, 
@@ -199,16 +240,11 @@ int main(int argc, char** argv) {
 
     
     int nclusters = 6;
-    bisect(g, clusters, uv_visited, visited, 0, n, 1, nclusters+1);
-    vector<int> cl(nclusters, 0);
-    for (auto c : clusters)
-     cl[c-1]++;
-    for (auto x: cl)
+    partition(g, clusters, visited, nclusters);
+    
+    for (auto x: clusters)
       cout << x << " ";
     cout << endl;
     
-    for (int i=1; i<nclusters+1; i++)
-      cout << check_connected(g, clusters, visited, i) << " ";
-    cout << endl;
-    return 0;
+  return 0;
 }
