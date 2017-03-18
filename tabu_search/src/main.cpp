@@ -6,7 +6,8 @@
 #include <cassert>
 #include <random>
 #include <utility>
-#include <functional>
+#include <map>
+
 #include "reader.hpp"
 
 using std::cout;
@@ -18,8 +19,8 @@ using std::default_random_engine;
 using std::uniform_int_distribution;
 using std::pair;
 using std::make_pair;
-using std::greater;
 using std::priority_queue;
+using std::map;
 
 int bfs(const vector< vector< int > >&,
         const vector< int >& ,
@@ -46,7 +47,7 @@ void partition(const vector< vector< int > >& graph,
 // partition the graph into num_clusters connected clusters
   int n = graph.size();
   clusters.assign(n, -1);
-  priority_queue< pair< int, int >, vector< pair< int, int > >, greater< pair< int, int > > > sizes;
+  priority_queue< pair< int, int >  > sizes;
   sizes.push(make_pair(n, -1));
   int j = 0;
   for (int i=1; i<num_clusters; i++) {
@@ -59,9 +60,21 @@ void partition(const vector< vector< int > >& graph,
     int left_size, right_size;
     bisect(graph, clusters, visited, current_id, current_size, 
 	   j, j+1, left_size, right_size);
+    cout << "partitioned " << current_size << " into " << left_size << " and " << right_size << endl;
     sizes.push(make_pair(left_size, j));
     sizes.push(make_pair(right_size, j+1));
     j += 2;
+  }
+  
+  //canonical numbering
+  map< int, int > labels;
+  for (int i=0; i<n ;i++) {
+    int c = clusters[i];
+    if (labels.find(c) == labels.end()) {
+      int s = labels.size();
+      labels[c] = s;
+    }
+    clusters[i] = labels[c];
   }
 }
 
@@ -245,6 +258,9 @@ int main(int argc, char** argv) {
     for (auto x: clusters)
       cout << x << " ";
     cout << endl;
+    
+    for (int i=0; i<nclusters; i++)
+      cout << check_connected(g, clusters, visited, i) << endl;
     
   return 0;
 }
