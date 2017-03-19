@@ -70,6 +70,17 @@ void generate_constraints(int n, size_t m,
   }
 }
 
+void check_clusters(int nclusters, 
+  const vector< int >& clusters, 
+  const vector< vector< int > >& graph) {
+    for (auto x: clusters)
+      cout << x << " ";
+    cout << endl;
+    
+    for (int i=0; i<nclusters; i++)
+      cout << check_connected(graph, clusters, i) << endl;
+}
+
 int main(int argc, char** argv) {
 
     GraphReader gr(argv[1]);
@@ -80,16 +91,14 @@ int main(int argc, char** argv) {
     int nclusters = 6;
     InitialPartition p(g, nclusters);
     vector< int > clusters = p.get_clusters();
+    check_clusters(nclusters, clusters, g);
     
     generate_constraints(g.size(), g.size()/10, constraints, weights);
     Move m (g.size(), nclusters, 0.1, g, constraints, weights, clusters); 
+    clusters = m.get_clusters();
+    check_clusters(nclusters, clusters, g);
     
-    for (auto x: clusters)
-      cout << x << " ";
-    cout << endl;
-    
-    for (int i=0; i<nclusters; i++)
-      cout << check_connected(g, clusters, i) << endl;
+
     
   return 0;
 }

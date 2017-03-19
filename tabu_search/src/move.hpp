@@ -5,6 +5,7 @@
 #include <utility>
 #include <queue>
 #include <set>
+#include <iostream>
 
 using std::vector;
 using std::map;
@@ -12,6 +13,8 @@ using std::pair;
 using std::make_pair;
 using std::priority_queue;
 using std::set;
+using std::cout;
+using std::endl;
 
 class Move {
 public:
@@ -70,9 +73,28 @@ public:
 	      penalty_sum += cl_weights[i][u];
 	penalty_sum /= 2;
 	best_cost = minsize + gamma * penalty_sum;
+	
+	
+	do_move();
+    }
+    
+    vector< int > get_clusters(){
+      return clusters;
     }
 
 private:
+  
+  void do_move() {
+    for (int i=0; i<10; i++) {
+    calculate_gains();
+    pair< double, pair< int, int > > x = gains.top();
+    double improvement = x.first;
+    int node = x.second.first, target = x.second.second;
+    cout << node << " " << target << " " << improvement << endl;
+    if (cluster_sizes[clusters[node]] > 1)
+      update(node, target);
+    }
+  }
   
   void update(int node, int target){
     int origin = clusters[node];
@@ -115,9 +137,7 @@ private:
       penalties[i][origin] -= weight;
       penalties[i][target] += weight;
     }
-    
-
-    
+       
   }
   
   void calculate_gains(){
@@ -127,7 +147,6 @@ private:
       for (int target=0; target < _n_clusters; target++) {
 	if(!valid_moves[node][target])
 	  continue;
-	
 	int origin = clusters[node];
 	double improvement = _gamma * (penalties[node][origin] - penalties[node][target]);
 	if(cluster_sizes[origin] == minsize)

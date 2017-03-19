@@ -1,1 +1,0 @@
-In the `bisect()` function, ensure that the two formed clusters are connected. Do not do the bisection recursively. At each step, pick the largest cluster and divide it into two clusters. This way, all clusters will be connected.
