@@ -4,12 +4,14 @@
 #include <map>
 #include <utility>
 #include <queue>
+#include <set>
 
 using std::vector;
 using std::map;
 using std::pair;
 using std::make_pair;
 using std::priority_queue;
+using std::set;
 
 class Move {
 public:
@@ -23,59 +25,99 @@ public:
         _gamma(gamma), _graph(graph),
         clusters(initial_clusters) {
 
-	node_to_constraints.assign(_n_vertices, vector< pair< int, double > >());
+	cl_pairs.assign(_n_vertices, set< int >());
+	cl_weights.assign(_n_vertices, map< int, double >());
         for (int i=0, s=constraints.size(); i<s; i++) {
             int first = constraints[i].first,
                 second = constraints[i].second;
             double weight = weights[i];
-            node_to_constraints[first].push_back(make_pair(second, weight));
-            node_to_constraints[second].push_back(make_pair(first, weight));
+	    cl_pairs[first].insert(second);
+	    cl_pairs[second].insert(first);
+	    cl_weights[first][second] = weight;
+	    cl_weights[second][first] = weight;
         }
         
         penalties.assign(_n_vertices, vector< double >(_n_clusters, 0));
         for (int i=0; i<_n_vertices; i++) 
-	  for (auto c : node_to_constraints[i]) {
-	    int u = c.first;
-	    int w = c.second;
-	    penalties[i][clusters[u]] += w;
-	  }
-	
+	  for (auto u : cl_pairs[i]) 
+	    penalties[i][clusters[u]] += cl_weights[i][u];
 
         cluster_sizes.assign(_n_clusters, 0);
         for (int i=0; i<_n_vertices; i++) 
             cluster_sizes[clusters[i]]++;
-        
 
         minsize = cluster_sizes[0];
 	second_minsize = cluster_sizes[1];
-        minsize_cluster = 0;
         for (int i=1; i<_n_clusters; i++)
             if(cluster_sizes[i] < minsize) {
 		second_minsize = minsize;
                 minsize = cluster_sizes[i];
-                minsize_cluster = i;
             }
 
         // initialize valid_moves
         valid_moves.assign(_n_vertices, vector< bool >(_n_clusters, false));
 	for (int i=0; i < _n_vertices; i++) {
-	  // extra constraint: no empty clusters!
-	  if (cluster_sizes[clusters[i]] == 1)
-	    continue;
 	  for (auto u : _graph[i])
 	    if (clusters[u] != clusters[i])
 	      valid_moves[i][clusters[u]] = true;
 	}
+	
+	best_sol = clusters;
+	double penalty_sum = 0;
+	for(int i=0; i<_n_vertices; i++) 
+	  for(auto u : cl_pairs[i])
+	    if (clusters[u] == clusters[i])
+	      penalty_sum += cl_weights[i][u];
+	penalty_sum /= 2;
+	best_cost = minsize + gamma * penalty_sum;
     }
 
 private:
   
-  // TODO update the values of data structures after a move  
-  void update(int node, int cluster){
-    // update clusters
+  void update(int node, int target){
+    int origin = clusters[node];
     // update minsize, minsize_cluster, second_minsize
-    // update penalties
+    if (minsize == cluster_sizes[origin]) {
+      second_minsize = minsize;
+      minsize--;
+    }
+    else if (minsize == cluster_sizes[target]) {
+      if(second_minsize == minsize) {
+	minsize = second_minsize;
+	second_minsize++;
+      }
+      else
+	minsize++;
+    }
+    
+    // update clusters
+    clusters[node] = target;
+    
     // update valid_moves
+    valid_moves[node][origin] = true;
+    valid_moves[node][target] = false;
+    
+    for (auto u : _graph[node]) {
+      valid_moves[node][origin] = true;
+      bool to_origin = false;
+      for (int i=0, s=_graph[u].size(); !to_origin && i<s; i++)
+	if(clusters[_graph[u][i]] == origin)
+	  to_origin = true;
+      valid_moves[u][origin] = to_origin;
+    }
+
+    
+    // update penalties
+    for(int i=0; i<_n_vertices; i++) {
+      if (cl_pairs[i].find(node) == cl_pairs[i].end())
+	continue;
+      double weight = cl_weights[i][node];
+      penalties[i][origin] -= weight;
+      penalties[i][target] += weight;
+    }
+    
+
+    
   }
   
   void calculate_gains(){
@@ -105,9 +147,11 @@ private:
     vector< int > cluster_sizes;
     int minsize;
     int second_minsize;
-    int minsize_cluster;
     vector< int > clusters;
-    vector< vector< pair< int, double > > > node_to_constraints;
+    double best_cost;
+    vector< int > best_sol;
+    vector< set< int > > cl_pairs;
+    vector< map< int, double > > cl_weights;
     vector< vector< double > > penalties;
     vector< vector< bool > > valid_moves;
     priority_queue< pair< double, pair< int, int > > > gains;
