@@ -4,6 +4,7 @@
 
 #include "reader.hpp"
 #include "init.hpp"
+#include "move.hpp"
 
 using std::cout;
 using std::endl;
@@ -45,7 +46,6 @@ int main(int argc, char** argv) {
 
     GraphReader gr(argv[1]);
     vector< vector< int > > g = gr.get_graph();
-    int n = g.size();
     int nclusters = 6;
     InitialPartition p(g, nclusters);
     vector< int > clusters = p.get_clusters();
