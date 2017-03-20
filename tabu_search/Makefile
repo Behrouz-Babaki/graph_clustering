@@ -29,4 +29,4 @@ obj/%.dep:src/%.cpp
 	rm -f $@.$$$$
 
 test: bin/main
-	@./bin/main ./data/G124.08
+	@./bin/main ./data/karate.graph

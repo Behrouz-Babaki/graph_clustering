@@ -6,6 +6,7 @@
 #include <queue>
 #include <set>
 #include <iostream>
+#include <algorithm>
 
 using std::vector;
 using std::map;
@@ -15,6 +16,7 @@ using std::priority_queue;
 using std::set;
 using std::cout;
 using std::endl;
+using std::min;
 
 class Move {
 public:
@@ -43,7 +45,7 @@ public:
         penalties.assign(_n_vertices, vector< double >(_n_clusters, 0));
         for (int i=0; i<_n_vertices; i++) 
 	  for (auto u : cl_pairs[i]) 
-	    penalties[i][clusters[u]] += cl_weights[i][u];
+	      penalties[i][clusters[u]] += cl_weights[i][u];
 
         cluster_sizes.assign(_n_clusters, 0);
         for (int i=0; i<_n_vertices; i++) 
@@ -74,6 +76,11 @@ public:
 	penalty_sum /= 2;
 	best_cost = minsize + gamma * penalty_sum;
 	
+	//ATTENTION the index orders for valid_moves and articulation_points are different
+	articulation_points.assign(_n_clusters, vector< bool >(_n_vertices, false));
+	for (int i=0; i<_n_clusters; i++)
+	  update_ap(i);
+	
 	
 	do_move();
     }
@@ -88,9 +95,7 @@ private:
     for (int i=0; i<10; i++) {
     calculate_gains();
     pair< double, pair< int, int > > x = gains.top();
-    double improvement = x.first;
     int node = x.second.first, target = x.second.second;
-    cout << node << " " << target << " " << improvement << endl;
     if (cluster_sizes[clusters[node]] > 1)
       update(node, target);
     }
@@ -104,12 +109,17 @@ private:
       minsize--;
     }
     else if (minsize == cluster_sizes[target]) {
-      if(second_minsize == minsize) {
-	minsize = second_minsize;
-	second_minsize++;
-      }
-      else
+      if(second_minsize > minsize)
 	minsize++;
+      else {
+	        minsize = cluster_sizes[0];
+	second_minsize = cluster_sizes[1];
+        for (int i=1; i<_n_clusters; i++)
+            if(cluster_sizes[i] < minsize) {
+		second_minsize = minsize;
+                minsize = cluster_sizes[i];
+            }
+      }
     }
     
     // update clusters
@@ -120,7 +130,8 @@ private:
     valid_moves[node][target] = false;
     
     for (auto u : _graph[node]) {
-      valid_moves[node][origin] = true;
+      if(clusters[u] != target)
+	valid_moves[u][target] = true;
       bool to_origin = false;
       for (int i=0, s=_graph[u].size(); !to_origin && i<s; i++)
 	if(clusters[_graph[u][i]] == origin)
@@ -130,14 +141,11 @@ private:
 
     
     // update penalties
-    for(int i=0; i<_n_vertices; i++) {
-      if (cl_pairs[i].find(node) == cl_pairs[i].end())
-	continue;
-      double weight = cl_weights[i][node];
-      penalties[i][origin] -= weight;
-      penalties[i][target] += weight;
-    }
-       
+    for (auto u : cl_pairs[node]) {
+      double weight = cl_weights[u][node];
+      penalties[u][origin] -= weight;
+      penalties[u][target] += weight;
+    }       
   }
   
   void calculate_gains(){
@@ -158,6 +166,43 @@ private:
 	gains.push(make_pair(improvement, make_pair(node, target)));
       }
   }
+  
+  void update_ap(int cluster) {
+    dfsNumberCounter = 0;
+    dfs_num.assign(_n_vertices, -1);
+    dfs_low.assign(_n_vertices, 0);
+    dfs_parent.assign(_n_vertices, 0);
+    articulation_points[cluster].assign(_n_vertices, false);
+    for (int i=0; i<_n_vertices; i++) {
+      if(clusters[i] != cluster)
+	continue;
+      if(dfs_num[i] == -1) {
+	dfsRoot = i;
+	rootChildren = 0;
+	ap(i, cluster);
+	articulation_points[cluster][dfsRoot] = (rootChildren > 1);
+      }
+    }
+  }
+  
+  void ap(int u, int cluster) {
+    dfs_low[u] = dfs_num[u] = dfsNumberCounter++;
+    for (auto v : _graph[u]) {
+      if(clusters[v] != cluster)
+	continue;
+      if (dfs_num[v] == -1) {
+	dfs_parent[v] = u;
+	if (u == dfsRoot)
+	  rootChildren++;
+	ap(v, cluster);
+	if(dfs_low[v] >= dfs_num[u])
+	  articulation_points[cluster][u] = true;
+	dfs_low[u] = min(dfs_low[u], dfs_low[v]);
+      }
+      else if (v != dfs_parent[u])
+	dfs_low[u] = min(dfs_low[u], dfs_num[v]);
+    }
+  }
 
     int _n_vertices;
     int _n_clusters;
@@ -174,5 +219,14 @@ private:
     vector< vector< double > > penalties;
     vector< vector< bool > > valid_moves;
     priority_queue< pair< double, pair< int, int > > > gains;
+    
+    // for finding articulation points
+    vector< vector< bool > > articulation_points;
+    int dfsNumberCounter;
+    int dfsRoot;
+    int rootChildren;
+    vector< int > dfs_num;
+    vector< int > dfs_low;
+    vector< int > dfs_parent;
 
 };

@@ -62,6 +62,8 @@ void generate_constraints(int n, size_t m,
   while (cl_vec.size() < m) {
     int first = uid(generator);
     int second = uid(generator);
+    if(first == second)
+      continue;
     pair< int, int > p = make_pair(first, second);
     if (cl_set.find(p) == cl_set.end()) {
       cl_vec.push_back(p);
