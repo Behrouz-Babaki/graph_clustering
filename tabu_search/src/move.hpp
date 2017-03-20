@@ -81,8 +81,8 @@ public:
 	for (int i=0; i<_n_clusters; i++)
 	  update_ap(i);
 	
-	
-	do_move();
+	tabu_list.assign(_n_vertices, vector< long > (_n_clusters, 0));
+	do_move(1000000);
     }
     
     vector< int > get_clusters(){
@@ -91,24 +91,47 @@ public:
 
 private:
   
-  void do_move() {
-    for (int i=0; i<10; i++) {
+  void do_move(long num_iterations) {
+    int node, origin, target;
+    
+    for (long i=1; i<num_iterations; i++) {
     calculate_gains();
-    pair< double, pair< int, int > > x = gains.top();
-    int node = x.second.first, target = x.second.second;
-    if (cluster_sizes[clusters[node]] > 1)
+    bool found = false;
+    pair< double, pair< int, int > > move;
+    while (!found) {
+      move = gains.top();
+      gains.pop();
+      node = move.second.first; 
+      target = move.second.second;
+      origin = clusters[node];
+      if(cluster_sizes[origin] < 2)
+	continue;
+      if(tabu_list[node][target] < i) 
+	found = true;
+    }
       update(node, target);
+      tabu_list[node][origin] = i + cluster_sizes[origin];
     }
   }
   
   void update(int node, int target){
     int origin = clusters[node];
+    int origin_size = cluster_sizes[origin];
+    int target_size = cluster_sizes[target];
+    
+    // update clusters
+    clusters[node] = target;
+
+    // update cluster cluster_sizes
+    cluster_sizes[origin]--;
+    cluster_sizes[target]++;
+    
     // update minsize, minsize_cluster, second_minsize
-    if (minsize == cluster_sizes[origin]) {
+    if (minsize == origin_size) {
       second_minsize = minsize;
       minsize--;
     }
-    else if (minsize == cluster_sizes[target]) {
+    else if (minsize == target_size) {
       if(second_minsize > minsize)
 	minsize++;
       else {
@@ -122,8 +145,7 @@ private:
       }
     }
     
-    // update clusters
-    clusters[node] = target;
+
     
     // update valid_moves
     valid_moves[node][origin] = true;
@@ -145,7 +167,10 @@ private:
       double weight = cl_weights[u][node];
       penalties[u][origin] -= weight;
       penalties[u][target] += weight;
-    }       
+    }
+    
+    // update articulation_points of the target 
+    update_ap(target);
   }
   
   void calculate_gains(){
@@ -153,9 +178,9 @@ private:
 
     for (int node=0; node < _n_vertices; node++)
       for (int target=0; target < _n_clusters; target++) {
-	if(!valid_moves[node][target])
-	  continue;
 	int origin = clusters[node];
+	if(!valid_moves[node][target] || articulation_points[origin][node])
+	  continue;
 	double improvement = _gamma * (penalties[node][origin] - penalties[node][target]);
 	if(cluster_sizes[origin] == minsize)
 	  improvement -= 1;
@@ -219,6 +244,7 @@ private:
     vector< vector< double > > penalties;
     vector< vector< bool > > valid_moves;
     priority_queue< pair< double, pair< int, int > > > gains;
+    vector< vector< long  > > tabu_list;
     
     // for finding articulation points
     vector< vector< bool > > articulation_points;
