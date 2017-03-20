@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#include <utility>
 #include "reader.hpp"
 
 using std::ifstream;
@@ -14,6 +15,8 @@ using std::endl;
 using std::string;
 using std::istringstream;
 using std::getline;
+using std::pair;
+using std::make_pair;
 
 GraphReader::GraphReader(string filename)
 {
@@ -46,4 +49,29 @@ GraphReader::GraphReader(string filename)
 vector< vector< int > > GraphReader::get_graph()
 {
   return this->graph;
+}
+
+void GraphReader::get_constraints(string filename, 
+				  vector< pair< int, int > >& cl,
+				  vector< double >& weights){
+  cl.clear();
+  weights.clear();
+  
+  ifstream cfile(filename, ifstream::in);
+  if(cfile.is_open()) {
+    string line;
+    int first, second;
+    double weight;
+    while(getline(cfile, line)) {
+      istringstream iss(line);
+      iss >> first >> second >> weight;
+      cl.push_back(make_pair(first, second));
+      weights.push_back(weight);
+    }
+  }
+  else {
+    cerr << "error opening constraint file" << endl;
+    exit(1);
+  }
+  cfile.close();
 }

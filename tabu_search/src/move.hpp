@@ -17,6 +17,7 @@ using std::set;
 using std::cout;
 using std::endl;
 using std::min;
+using std::flush;
 
 class Move {
 public:
@@ -74,7 +75,9 @@ public:
 	    if (clusters[u] == clusters[i])
 	      penalty_sum += cl_weights[i][u];
 	penalty_sum /= 2;
-	best_cost = minsize + gamma * penalty_sum;
+	current_cost = minsize - gamma * penalty_sum;
+	best_cost = current_cost;
+	
 	
 	//ATTENTION the index orders for valid_moves and articulation_points are different
 	articulation_points.assign(_n_clusters, vector< bool >(_n_vertices, false));
@@ -82,25 +85,27 @@ public:
 	  update_ap(i);
 	
 	tabu_list.assign(_n_vertices, vector< long > (_n_clusters, 0));
-	do_move(1000000);
+	do_move(100000);
     }
     
     vector< int > get_clusters(){
-      return clusters;
+      return best_sol;
     }
 
 private:
   
   void do_move(long num_iterations) {
     int node, origin, target;
-    
+    double imp;
     for (long i=1; i<num_iterations; i++) {
     calculate_gains();
+    cout << gains.size() << " candidates in " << i << endl;
     bool found = false;
     pair< double, pair< int, int > > move;
     while (!found) {
       move = gains.top();
       gains.pop();
+      imp = move.first;
       node = move.second.first; 
       target = move.second.second;
       origin = clusters[node];
@@ -110,8 +115,15 @@ private:
 	found = true;
     }
       update(node, target);
-      tabu_list[node][origin] = i + cluster_sizes[origin];
+      current_cost += imp;
+      if (current_cost > best_cost) {
+	best_cost = current_cost;
+	best_sol = clusters;
+	cout << best_cost << endl;
+      }
+      tabu_list[node][origin] = i + cluster_sizes[origin]/3;
     }
+    cout << endl;
   }
   
   void update(int node, int target){
@@ -171,6 +183,7 @@ private:
     
     // update articulation_points of the target 
     update_ap(target);
+    update_ap(origin);
   }
   
   void calculate_gains(){
@@ -237,7 +250,7 @@ private:
     int minsize;
     int second_minsize;
     vector< int > clusters;
-    double best_cost;
+    double best_cost, current_cost;
     vector< int > best_sol;
     vector< set< int > > cl_pairs;
     vector< map< int, double > > cl_weights;
