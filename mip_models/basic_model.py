@@ -46,7 +46,9 @@ class Basic_Model(object):
         return connectivity_vars        
         
     def __init__(self, n_vertices, edges, constraints, k, gamma, 
-                 verbosity=0, symmetry_breaking=1):
+                 verbosity=0, 
+                 symmetry_breaking=True,
+                 overlap=False):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
@@ -64,10 +66,12 @@ class Basic_Model(object):
                 cvars.append(v)
             self.mvars.append(cvars)
         self.model.update()
-            
-        # constraint: each vertex in exactly one cluster
+ 
+        ineq_sense = GRB.GREATER_EQUAL if overlap else GRB.EQUAL
+        # constraint: each vertex in exactly/at least one cluster
         for v in range(n_vertices):
-            self.model.addConstr(quicksum([self.mvars[i][v] for i in range(k)]), GRB.EQUAL, 1)
+            self.model.addConstr(quicksum([self.mvars[i][v] for i in range(k)]), 
+                                          ineq_sense, 1)
             
         # connectivity constraints:
         for v1 in range(n_vertices):
@@ -79,9 +83,10 @@ class Basic_Model(object):
                                          GRB.LESS_EQUAL,
                                          quicksum(cvars) + 1)
                     
-            
+        if overlap: 
+            symmetry_breaking = False            
         # symmetry-breaking constraints
-        if symmetry_breaking == 1:
+        if symmetry_breaking:
             self.model.addConstr(self.mvars[0][0], GRB.EQUAL, 1)
             for i in range(2, k):
                 self.model.addConstr(quicksum([self.mvars[i-1][j] for j in range(n_vertices)]),

@@ -86,7 +86,9 @@ def mincut_callback(model, where):
 
 class Bnc_Model(object):
     def __init__(self, n_vertices, edges, constraints, k, gamma, 
-                 verbosity=0, symmetry_breaking=1):
+                 verbosity=0, 
+                 symmetry_breaking=True,
+                 overlap=False):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.k = k
@@ -103,12 +105,16 @@ class Bnc_Model(object):
             mvars.append(cvars)
         model.update()
             
-        # constraint: each vertex in exactly one cluster
+        ineq_sense = GRB.GREATER_EQUAL if overlap else GRB.EQUAL
+        # constraint: each vertex in exactly/at least one cluster
         for v in range(n_vertices):
-            model.addConstr(quicksum([mvars[i][v] for i in range(k)]), GRB.EQUAL, 1)
-            
+            model.addConstr(quicksum([mvars[i][v] for i in range(k)]), 
+                                     ineq_sense, 1)
+                                         
+        if overlap: 
+            symmetry_breaking = False
         # symmetry-breaking constraints
-        if symmetry_breaking == 1:
+        if symmetry_breaking:
             model.addConstr(mvars[0][0], GRB.EQUAL, 1)
             for i in range(2, k):
                 model.addConstr(quicksum([mvars[i-1][j] for j in range(n_vertices)]) <=

@@ -64,12 +64,15 @@ if __name__ == '__main__':
                         help='print detailed output')
     parser.add_argument('--nosym', action='store_true',
                         help='disable symmetry breaking')
+    parser.add_argument('--overlap', action='store_true',
+                        help='allow overlap between clusters')
     args = parser.parse_args()    
 
     n_vertices, edges, constraints, node_ids = read_graph(args.graph_file, 
                                                           args.cons_file)
     verbosity = 1 if args.verbose else 0
-    sym = 0 if args.nosym else 1                            
+    overlap = args.overlap
+    sym = not (args.nosym or overlap)
     k = args.k
     gamma = args.gamma
     
@@ -77,12 +80,14 @@ if __name__ == '__main__':
         m = Bnc_Model(n_vertices, edges, 
                               constraints=constraints, 
                               k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=sym)
+                              symmetry_breaking=sym,
+                              overlap=overlap)
     elif args.method == 'basic':
         m = Basic_Model(n_vertices, edges, 
                               constraints=constraints, 
                               k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=sym)
+                              symmetry_breaking=sym,
+                              overlap=overlap)
     m.solve()
     print(m.clusters)
 
