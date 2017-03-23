@@ -48,12 +48,14 @@ class Basic_Model(object):
     def __init__(self, n_vertices, edges, constraints, k, gamma, 
                  verbosity=0, 
                  symmetry_breaking=True,
-                 overlap=False):
+                 overlap=False,
+                 timeout=None):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.edges = edges
         self.k = k
         self.verbosity = verbosity
+        self.timeout = timeout
         self.create_graph()
         
         self.model = Model('graph_clustering')
@@ -83,8 +85,6 @@ class Basic_Model(object):
                                          GRB.LESS_EQUAL,
                                          quicksum(cvars) + 1)
                     
-        if overlap: 
-            symmetry_breaking = False            
         # symmetry-breaking constraints
         if symmetry_breaking:
             self.model.addConstr(self.mvars[0][0], GRB.EQUAL, 1)
@@ -123,6 +123,8 @@ class Basic_Model(object):
             assert(u < n_vertices)
     
     def solve(self):
+        if self.timeout:
+            self.model.TimeLimit = self.timeout        
         try:
             self.model.optimize()
         except GurobiError:
