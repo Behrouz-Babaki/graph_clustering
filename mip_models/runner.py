@@ -72,7 +72,7 @@ if __name__ == '__main__':
                                                           args.cons_file)
     verbosity = 1 if args.verbose else 0
     overlap = args.overlap
-    sym = not (args.nosym or overlap)
+    sym = not args.nosym
     k = args.k
     gamma = args.gamma
     

@@ -88,11 +88,13 @@ class Bnc_Model(object):
     def __init__(self, n_vertices, edges, constraints, k, gamma, 
                  verbosity=0, 
                  symmetry_breaking=True,
-                 overlap=False):
+                 overlap=False,
+                 timeout=None):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
         self.k = k
         self.verbosity = verbosity
+        self.timeout = timeout
         
         model = Model('graph_clustering')
         
@@ -111,8 +113,6 @@ class Bnc_Model(object):
             model.addConstr(quicksum([mvars[i][v] for i in range(k)]), 
                                      ineq_sense, 1)
                                          
-        if overlap: 
-            symmetry_breaking = False
         # symmetry-breaking constraints
         if symmetry_breaking:
             model.addConstr(mvars[0][0], GRB.EQUAL, 1)
@@ -160,6 +160,8 @@ class Bnc_Model(object):
             assert(u < n_vertices)
     
     def solve(self):
+        if self.timeout:
+            self.model.TimeLimit = self.timeout        
         try:
             self.model.optimize(mincut_callback)
         except GurobiError:
