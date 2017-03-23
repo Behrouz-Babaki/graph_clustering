@@ -1,36 +1,36 @@
-\documentclass[]{article}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
+\documentclass[conference,compsoc]{IEEEtran}
 \usepackage{amssymb,amsmath,amsthm}
-\usepackage{natbib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{graphicx}
 \usepackage{caption}
-\usepackage{fixltx2e} % provides \textsubscript
-\usepackage[unicode=true]{hyperref}
-\hypersetup{breaklinks=true,
-            bookmarks=true,
-            pdfauthor={},
-            pdftitle={},
-            colorlinks=true,
-            citecolor=blue,
-            urlcolor=blue,
-            linkcolor=magenta,
-            pdfborder={0 0 0}}
-\urlstyle{same}  % don't use monospace font for urls
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
-\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\usepackage{cite}
+
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 
 \begin{document}
 
 \title{A Branch-and-Cut Algorithm for Constrained Graph Clustering}
-\author{Behrouz Babaki}
-\date{}
+
+\author{\IEEEauthorblockN{Behrouz Babaki}
+\IEEEauthorblockA{Dept. Computer Science\\
+KU Leuven, Belgium}
+\and
+\IEEEauthorblockN{Dries Van Daele}
+\IEEEauthorblockA{Dept. Computer Science\\
+KU Leuven, Belgium}
+\and
+\IEEEauthorblockN{Tias Guns}
+\IEEEauthorblockA{Dept. Business, Technology, \\and Operations\\
+VUB, Belgium}}
+
 \maketitle
+
+\begin{abstract}
+In this note, we introduce a method for solving a class of graph
+clustering problems.
+\end{abstract}
 
 \section{Introduction}
 \label{introduction}
@@ -112,22 +112,22 @@ the next section. The model that we defined in this section is presented
 below:
 
 \begin{align}
-&\text{maximize} \quad s + \gamma \sum_{i=1}^{k} \sum_{(w, u, v) \in C} w y_{iuv} & \\
-&\textit{s.t.} & \nonumber \\
-& \sum_{i=1}^k x_{ij} = 1 \quad &\forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \geq x_{iu} + x_{iv} -1 \quad &\forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
-&s \leq \sum_{i=1}^{|V|} x_{ij} \quad &\forall i \in \{1, \ldots, k\} \\
-& \mathsf{connected}(x_{i1}, \ldots, x_{i|V|}) \quad &\forall i \in \{1, \ldots, k\} \\
-& x_{ij} \in \{0, 1\} \quad &\forall i \in \{1, \ldots, k\}, \forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \in \{0, 1\} \quad &\forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
-& s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}
+& \text{maximize} \quad s + \gamma \sum_{i=1}^{k} \sum_{(w, u, v) \in C} w  y_{iuv}  \\
+&\textit{s.t.}                                                                       \nonumber \\
+&\sum_{i=1}^k x_{ij} = 1                                                             \forall j \in \{1, \ldots, |V|\} \\
+& y_{iuv} \geq x_{iu} + x_{iv} -1                                                    \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+& s \leq \sum_{i=1}^{|V|} x_{ij}                                                     \forall i \in \{1, \ldots, k\} \\
+& \mathsf{connected}(x_{i1}, \ldots, x_{i|V|})                                       \forall i \in \{1, \ldots, k\} \\
+& x_{ij} \in \{0, 1\}                                                                \forall i \in \{1, \ldots, k\}, \forall j \in \{1, \ldots, |V|\} \\
+& y_{iuv} \in \{0, 1\}                                                               \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+& s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}                                  
 \end{align}
 
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint. The contents of this
-section are a slight modification of the methods presented in~\citet{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
+section are a slight modification of the methods presented in~\cite{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
 
 \begin{definition}[Node-cut set]
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
@@ -135,34 +135,31 @@ Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nod
 
 A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its vertices. Figures \ref{fig:nodecut} and \ref{fig:minimal} depict the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
 
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{node_cut}
+\caption{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
+\label{fig:nodecut}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{minimal}
+\caption{The set \{3, 4\} belongs to $\Gamma(2, 5)$, but the set \{1, 3, 4\} does not.}
+\label{fig:minimal}
+\end{figure}
+
 \begin{theorem}
 Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
 \end{theorem}
 
 Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ can be formulated as follows:
 
-\begin{equation}
-\sum_{w \in S} x_{iw} \geq x_{iu} + x_{iv} - 1 \qquad \forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
+\begin{align}
+\sum_{w \in S} x_{iw} \geq x_{iu} &+ x_{iv} - 1 \nonumber \\ 
+&\forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
 \label{eq:connectivity}
-\end{equation}
-
-\begin{figure}
-\centering
-\begin{minipage}{.55\textwidth}
-\centering
-\includegraphics[scale=0.7]{node_cut}
-\captionsetup{font=small,margin=10pt}
-\captionof{figure}{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
-\label{fig:nodecut}
-\end{minipage}%
-\begin{minipage}{.45\textwidth}
-\centering
-\includegraphics[scale=0.8]{minimal}
-\captionsetup{font=small, margin=10pt}
-\captionof{figure}{The set \{3, 4\} belongs to $\Gamma(2, 5)$, but the set \{1, 3, 4\} does not.}
-\label{fig:minimal}
-\end{minipage}
-\end{figure}
+\end{align}
 
 This formulation adds an exponential number of inequalities to the
 problem, which makes it impractical for all graphs but those with only a
@@ -240,7 +237,7 @@ edges, with capacities equal to the capacity of $v$. We obtain the
 minimum node cut separating $u$ and $v$ by computing the minimum cut
 between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 
-We followed the recipe of~\citet{CarvajalCGVW13} for adding the cuts: We added cuts to the
+We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: We added cuts to the
 linear relaxation only at the root node of the branch-and-cut tree.
 Moreover, when adding cuts to the relaxation, we monitored the change in
 the value of objective function, and stopped adding the cuts if this
@@ -248,7 +245,7 @@ value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
 
-\bibliographystyle{plainnat}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
 
 \end{document}
