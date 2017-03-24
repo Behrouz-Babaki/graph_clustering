@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.5
 # coding: utf-8
 
+from __future__ import print_function, division
 import argparse
 from bnc_model import Bnc_Model
 from basic_model import Basic_Model
@@ -60,7 +61,8 @@ if __name__ == '__main__':
     parser.add_argument('gamma', type=float, help='balance coefficient')
     parser.add_argument('method', choices=['basic', 'bnc'], 
                         help='mip model to be used')
-    parser.add_argument('--timeout', type=float, default=None)
+    parser.add_argument('--timeout', type=float, default=None,
+                        help='set a time limit')
     parser.add_argument('--verbose', action='store_true', 
                         help='print detailed output')
     parser.add_argument('--nosym', action='store_true',

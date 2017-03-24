@@ -1,6 +1,6 @@
 # coding: utf-8
 
-
+from __future__ import print_function, division
 from gurobipy import Model, GRB, quicksum, LinExpr
 import networkx as nx
 
@@ -95,7 +95,8 @@ class Basic_Model(object):
         
         
         obj_expr = LinExpr()
-        
+        wsum = sum(w for (_, _, w) in constraints)
+        gamma = gamma/wsum        
         # indicators for violation of cl constraints
         for (u, v, w) in constraints:
             for i in range(k):
@@ -109,7 +110,7 @@ class Basic_Model(object):
         self.model.update()
         for i in range(k):
             self.model.addConstr(s <= quicksum([self.mvars[i][v] for v in range(n_vertices)]))
-        obj_expr.add(s)
+        obj_expr.add(k/n_vertices * s)
         
         self.model.setObjective(obj_expr, GRB.MAXIMIZE)
         self.model.params.OutputFlag = self.verbosity

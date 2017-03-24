@@ -1,9 +1,8 @@
 # coding: utf-8
 
-
-import networkx as nx
+from __future__ import print_function, division
 from gurobipy import Model, GRB, quicksum, LinExpr, GurobiError
-
+import networkx as nx
 
 class Cut_Finder(object):
     def __init__(self, ingraph_nnodes, ingraph_edges):
@@ -122,7 +121,8 @@ class Bnc_Model(object):
         
         
         obj_expr = LinExpr()
-        
+        wsum = sum(w for (_, _, w) in constraints)
+        gamma = gamma/wsum
         # indicators for violation of cl constraints
         for (u, v, w) in constraints:
             for i in range(k):
@@ -136,7 +136,7 @@ class Bnc_Model(object):
         model.update()
         for i in range(k):
             model.addConstr(s <= quicksum([mvars[i][v] for v in range(n_vertices)]))
-        obj_expr.add(s)
+        obj_expr.add(k/n_vertices * s)
         
         model.setObjective(obj_expr, GRB.MAXIMIZE)
         model.params.OutputFlag = self.verbosity
