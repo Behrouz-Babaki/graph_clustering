@@ -161,7 +161,7 @@ class Bnc_Model(object):
     
     def solve(self):
         if self.timeout:
-            self.model.TimeLimit = self.timeout        
+            self.model.Params.TimeLimit = self.timeout        
         try:
             self.model.optimize(mincut_callback)
         except GurobiError:

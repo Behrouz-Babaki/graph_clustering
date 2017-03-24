@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5
 # coding: utf-8
 
 import argparse
@@ -60,6 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('gamma', type=float, help='balance coefficient')
     parser.add_argument('method', choices=['basic', 'bnc'], 
                         help='mip model to be used')
+    parser.add_argument('--timeout', type=float, default=None)
     parser.add_argument('--verbose', action='store_true', 
                         help='print detailed output')
     parser.add_argument('--nosym', action='store_true',
@@ -75,19 +76,24 @@ if __name__ == '__main__':
     sym = not args.nosym
     k = args.k
     gamma = args.gamma
+    timeout = args.timeout
+    
+    kwargs = dict(n_vertices=n_vertices, 
+                  edges=edges, 
+                  constraints=constraints, 
+                  k=k, gamma=gamma, 
+                  verbosity=verbosity, 
+                  symmetry_breaking=sym,
+                  overlap=overlap,
+                  timeout=timeout)
     
     if args.method == 'bnc':
-        m = Bnc_Model(n_vertices, edges, 
-                              constraints=constraints, 
-                              k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=sym,
-                              overlap=overlap)
+        m = Bnc_Model(**kwargs)
     elif args.method == 'basic':
-        m = Basic_Model(n_vertices, edges, 
-                              constraints=constraints, 
-                              k=k, gamma=gamma, verbosity=verbosity, 
-                              symmetry_breaking=sym,
-                              overlap=overlap)
+        m = Basic_Model(**kwargs)
+        
     m.solve()
     print(m.clusters)
+    print(m.objective)
+    print(m.runtime)
 

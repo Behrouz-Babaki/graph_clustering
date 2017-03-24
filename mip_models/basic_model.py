@@ -124,7 +124,7 @@ class Basic_Model(object):
     
     def solve(self):
         if self.timeout:
-            self.model.TimeLimit = self.timeout        
+            self.model.Params.TimeLimit = self.timeout        
         try:
             self.model.optimize()
         except GurobiError:
