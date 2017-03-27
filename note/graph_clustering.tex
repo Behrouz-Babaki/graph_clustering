@@ -6,6 +6,7 @@
 \usepackage{caption}
 \usepackage{cite}
 \usepackage{sidecap}
+\usepackage{lipsum}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
@@ -29,8 +30,7 @@ VUB, Belgium}}
 \maketitle
 
 \begin{abstract}
-In this note, we introduce a method for solving a class of graph
-clustering problems.
+\lipsum[1]
 \end{abstract}
 
 \section{Introduction}
@@ -58,11 +58,7 @@ avoid obtaining components that are too small. Second, the total
 weight of penalties should be as small as possible.
 
 We formulate this problem as mixed integer programming (MIP)
-problem. There are several studies that using mathematical programming
-for clustering and graph partitioning
-problems~\cite{Hansen}. Graph partitioning has been solved using integer programming~\cite{REF}, semidefinite programming~\cite{REF}, and quadratic programming~\cite{REF}. Techniques such as branch-and-cut~\cite{REF} and branch-and-price~\cite{REF} have been used to improve the integer programming formulations of such problems. 
-
-Recently, there has been an interest in such
+problem. Recently, there has been an interest in such
 approaches from the \emph{declarative data mining}
 perspective~\cite{vran,me}. This perspective encourages formulating
 data mining problems as models in constraint satisfaction/optimization
@@ -70,13 +66,9 @@ frameworks (e.g. constraint programming and integer programming). One
 of the motivations for doing so is that existing algorithms can be
 extended to new problems by modification of addition of constraints.
 
-The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem~\cite{REF}. In most variants of graph partitioning, the edges are assumed to be weighted~\cite{REF}. The number of clusters can be specified by user~\cite{REF} or decided by the algorithm. Two most prominent objective functions are 1) minimizing the total weight of the edges that have endpoints in different clusters~\cite{REF} and 2) minimizing the total weight fo the edges that have endpoints in the same cluster~\cite{REF}. Both these objectives are meant to increase the homogeneity of clusters.  
+Our contributions \ldots
 
-Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{REF}. Other types of constraints include constraint on the minimum size of a cluster~\cite{REF}, upper and lower bounds on size of clusters~\cite{REF}, and constraints on total weight of nodes in a cluster~\cite{REF}. 
-
-The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{connected} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
-
-The rest of this paper is structured as follows: In
+The rest of this paper is structured as follows: First we review the related literature in section~\ref{sec:related}. In
 section~\ref{sec:motivation} we present the application that motivates
 this problem.  section~\ref{sec:definition} we introduce the formal
 definition of the problem and present the sketch of a MIP formulation.
@@ -88,11 +80,25 @@ model. Section~\ref{sec:experiments} contains some experiments and
 discussions. Finally in section~\ref{sec:conclusion}, 
 we present the conclusions and suggestions for future work.
 
+\section{Related work}
+\label{sec:related}
+There are several studies that using mathematical programming
+for clustering and graph partitioning
+problems~\cite{Hansen}. Graph partitioning has been solved using integer programming~\cite{REF}, semidefinite programming~\cite{REF}, and quadratic programming~\cite{REF}. Techniques such as branch-and-cut~\cite{REF} and branch-and-price~\cite{REF} have been used to improve the integer programming formulations of such problems. 
+
+The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem~\cite{REF}. In most variants of graph partitioning, the edges are assumed to be weighted~\cite{REF}. The number of clusters can be specified by user~\cite{REF} or decided by the algorithm. Two most prominent objective functions are 1) minimizing the total weight of the edges that have endpoints in different clusters~\cite{REF} and 2) minimizing the total weight fo the edges that have endpoints in the same cluster~\cite{REF}. Both these objectives are meant to increase the homogeneity of clusters.  
+
+Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{REF}. Other types of constraints include constraint on the minimum size of a cluster~\cite{REF}, upper and lower bounds on size of clusters~\cite{REF}, and constraints on total weight of nodes in a cluster~\cite{REF}. 
+
+The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{connected} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
+
 \section{Motivating application}
 \label{sec:motivation}
 
 \section{Problem definition}
 \label{sec:definition}
+
+Let us first review some standard definitions in graph theory: \ldots
 
 Consider an undirected graph $G(V, E)$. Our goal is to partition $V$
 into $k$ subsets (called \emph{clusters} from now on), such that the
@@ -148,7 +154,9 @@ Our formulation so far does not ensure that the vertices in each cluster
 are connected. For now assume that constraint
 $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ enforces the connectivity of
 cluster $i$. We will discuss the exact formulation of this constraint in
-the next section. The model that we defined in this section is presented
+the next section. 
+
+The model that we defined in this section is presented
 below:
 
 \begin{align}
@@ -163,10 +171,16 @@ below:
 & s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}                                  
 \end{align}
 
+About overlapping clusters and breaking symmetries \ldots
+
 \section{Enforcing connectivity}
 \label{sec:connectivity}
+In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint.
 
-In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint. The contents of this
+\subsection{Enumerating all paths}
+
+\subsection{A cutting-plane approach}
+ The contents of this
 section are a slight modification of the methods presented in~\cite{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
 
 \begin{definition}[Node-cut set]
@@ -174,13 +188,6 @@ Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nod
 \end{definition}
 
 A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its vertices. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
-
-%\begin{figure}
-%\centering
-%\includegraphics[scale=0.7]{images/node_cut}
-%\caption{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
-%\label{fig:nodecut}
-%\end{figure}
 
 \begin{SCfigure}[1.4]
 \centering
