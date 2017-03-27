@@ -5,7 +5,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{cite}
-\usepackage{array}
+\usepackage{sidecap}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
@@ -140,9 +140,9 @@ of the smallest cluster. The domain of $s$ is
 $\{0, \ldots, \lceil \frac{|V|}{k} \rceil \}$. The following constraints
 ensure that $s$ represents the size of the smallest cluster:
 
-\begin{equation}
+\begin{align}
 s \leq \sum_{i=1}^{|V|} x_{ij} \quad \forall i \in \{1, \ldots, k\}
-\end{equation}
+\end{align}
 
 Our formulation so far does not ensure that the vertices in each cluster
 are connected. For now assume that constraint
@@ -173,21 +173,21 @@ section are a slight modification of the methods presented in~\cite{CarvajalCGVW
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
 \end{definition}
 
-A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its vertices. Figures \ref{fig:nodecut} and \ref{fig:minimal} depict the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
+A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its vertices. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.7]{node_cut}
-\caption{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
-\label{fig:nodecut}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.7]{images/node_cut}
+%\caption{$S$ is a $uv$-node cut set. Each path between $u$ and $v$ passes through $S$}
+%\label{fig:nodecut}
+%\end{figure}
 
-\begin{figure}
+\begin{SCfigure}[1.4]
 \centering
-\includegraphics[scale=0.7]{minimal}
-\caption{The set \{3, 4\} belongs to $\Gamma(2, 5)$, but the set \{1, 3, 4\} does not.}
-\label{fig:minimal}
-\end{figure}
+\includegraphics[scale=0.7]{images/cutset}
+\caption{The sets \{2, 5\} and \{3, 5\} belong to $\Gamma(1, 4)$, but the set \{2, 3, 5\} does not.}
+\label{fig:cutset}
+\end{SCfigure}
 
 \begin{theorem}
 Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
@@ -195,11 +195,11 @@ Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exist
 
 Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ can be formulated as follows:
 
-\begin{align}
-\sum_{w \in S} x_{iw} \geq x_{iu} &+ x_{iv} - 1 \nonumber \\ 
-&\forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
+\begin{multline}
+\sum_{w \in S} x_{iw} \geq x_{iu} + x_{iv} - 1 \\
+\forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
 \label{eq:connectivity}
-\end{align}
+\end{multline}
 
 This formulation adds an exponential number of inequalities to the
 problem, which makes it impractical for all graphs but those with only a
