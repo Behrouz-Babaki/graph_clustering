@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{cite}
+\usepackage{array}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
@@ -35,39 +36,78 @@ clustering problems.
 \section{Introduction}
 \label{introduction}
 
-In this note, we introduce a method for solving a class of graph
-clustering problems. The structure of this note is as follows: In
-section~\ref{sec:definition} we introduce the problem. In
-section~\ref{sec:formulation} we present a mathematical programming
-formulation for the problem. This formulation is incomplete in the
-sense that the it is not yet clear that how the \emph{connectivity}
-constraints will be formulated. In section~\ref{sec:connectivity} we
-introduce a formulation for the connectivity constraints. This
-formulation involves an exponential number of constraints. We then
-present a method for adding only a sufficient subset of these
-constraints to the model. We conclude this note in section~\ref{sec:implementation} after 
-discussing some of the implementation details.
+Clustering is the task of partitioning a set of instances into
+homogeneous subsets. Most clustering algorithms only take the features
+of individual instances as input. However, it is also possible to
+encode the relationships between instances as a graph and include this
+information in the clustering task. When the instances form the nodes
+of a graph, the clustering task is also called \emph{graph
+  partitioning}. Given the abundance of relational data in social
+network analysis and bioinformatics, it is not a surprise to see
+numerous applications of graph partitioning in these fields. However,
+graph partitioning has also applications in route planning, image
+processing, VLSI design, and parallel processing~\cite{Survey}.
 
-\section{Probelm definition}
+Motivated by an application in the analysis of biological networks, we
+introduce the following graph partitioning problem: Given a Graph
+$G=(V, E)$ and a positive integer $k$, partition the graph into $k$
+connected components. We also assume that there are a set of penalties
+for co-membership of certain pairs of nodes in the same cluster. We
+desire two properties for the output partitioning: First, we want to
+avoid obtaining components that are too small. Second, the total
+weight of penalties should be as small as possible.
+
+We formulate this problem as mixed integer programming (MIP)
+problem. There are several studies that using mathematical programming
+for clustering and graph partitioning
+problems~\cite{Hansen}. Graph partitioning has been solved using integer programming~\cite{REF}, semidefinite programming~\cite{REF}, and quadratic programming~\cite{REF}. Techniques such as branch-and-cut~\cite{REF} and branch-and-price~\cite{REF} have been used to improve the integer programming formulations of such problems. 
+
+Recently, there has been an interest in such
+approaches from the \emph{declarative data mining}
+perspective~\cite{vran,me}. This perspective encourages formulating
+data mining problems as models in constraint satisfaction/optimization
+frameworks (e.g. constraint programming and integer programming). One
+of the motivations for doing so is that existing algorithms can be
+extended to new problems by modification of addition of constraints.
+
+The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem~\cite{REF}. In most variants of graph partitioning, the edges are assumed to be weighted~\cite{REF}. The number of clusters can be specified by user~\cite{REF} or decided by the algorithm. Two most prominent objective functions are 1) minimizing the total weight of the edges that have endpoints in different clusters~\cite{REF} and 2) minimizing the total weight fo the edges that have endpoints in the same cluster~\cite{REF}. Both these objectives are meant to increase the homogeneity of clusters.  
+
+Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{REF}. Other types of constraints include constraint on the minimum size of a cluster~\cite{REF}, upper and lower bounds on size of clusters~\cite{REF}, and constraints on total weight of nodes in a cluster~\cite{REF}. 
+
+The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{connected} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
+
+The rest of this paper is structured as follows: In
+section~\ref{sec:motivation} we present the application that motivates
+this problem.  section~\ref{sec:definition} we introduce the formal
+definition of the problem and present the sketch of a MIP formulation.
+In section~\ref{sec:connectivity} we introduce two formulations for
+the connectivity constraints. Both these formulation involve an
+exponential number of constraints. We then present a method for
+including only a sufficient subset of these constraints to the
+model. Section~\ref{sec:experiments} contains some experiments and
+discussions. Finally in section~\ref{sec:conclusion}, 
+we present the conclusions and suggestions for future work.
+
+\section{Motivating application}
+\label{sec:motivation}
+
+\section{Problem definition}
 \label{sec:definition}
 
 Consider an undirected graph $G(V, E)$. Our goal is to partition $V$
 into $k$ subsets (called \emph{clusters} from now on), such that the
 subgraph induced by each subset is connected. Our preference is to avoid
-having clusters that contain only a small number of vertices. To enforce
+having clusters that contain only a small number of nodes. To enforce
 this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
 $C = \{(u, v, w): u, v \in V, w \in \mathbb{R}^+\}$ which indicates that
 including $u$ and $v$ in the same cluster will induce a penalty of $w$. We denote all edges $(u, v)$ such that $(u, v, w) \in C$ by $E_C$. Our second goal is to minimize the sum of such penalties.
 
 To include both goals in the objective function, assume that $S$ is the
-size of the smallest clsuter and $W$ is the total penalty. We define the
+size of the smallest cluster and $W$ is the total penalty. We define the
 objective function as maximizing $S + \gamma W$ where $\gamma$ is a
 parameter specified by user which determines the relative importance of
 each of the two goals.
-
-\section{A mathematical programming formulation}
-\label{sec:formulation}
 
 We can formulate this problem as an integer linear program. The main
 decision variables in this formulation are those that determine the
@@ -77,7 +117,7 @@ cluster $i$. We know that each vertex is assigned to exactly one
 cluster. This can be enforced by the following set of constraints:
 
 \begin{equation}
-\sum_{i=1}^k x_{ij} = 1 \quad \forall j \in \{1, \ldots, |V|\}
+\sum_{i=1}^k x_{ij} = 1 \quad \forall j \in \{1, \ldots, |V|\} \\
 \end{equation}
 
 To include the penalties in the model, we introduce additional
@@ -203,13 +243,13 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \centering
 \caption{The cut-generation procedure}
 \label{alg:cut}
-\begin{algorithmic}
+\begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$
 \For{$i \in \{1, \ldots, k\}$}
 	\For{$u, v$ such that $(u, v) \notin E$}
-		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$ \Comment Find the minimum $uv$-node cut
+		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$ 
 		\If{$\sum_{w \in S^*} x_{iw}^* < x_{iu}^* + x_{iv}^* - 1$}
-			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$ \Comment violated constraint
+			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$ 
 		\EndIf
 	\EndFor
 \EndFor
@@ -224,9 +264,10 @@ We can also take a step further and solve the separation problem using
 the solution for the linear relaxation of the problem. We use both these
 practices in our implementation.
 
-\section{Implementation details}
-\label{sec:implementation}
+\section{Experiments}
+\label{sec:experiments}
 
+\subsection{Implementation details}
 We implemented our branch-and-cut algorithm using the python interface
 of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the
 implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11}\footnote{networkx.github.io} library. To use this implementation for our problem, we replaced
@@ -244,6 +285,9 @@ the value of objective function, and stopped adding the cuts if this
 value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
+
+\section{conclusion and future work}
+\label{sec:conclusion}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
