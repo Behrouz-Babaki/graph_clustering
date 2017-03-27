@@ -110,7 +110,9 @@ class Basic_Model(object):
         self.model.update()
         for i in range(k):
             self.model.addConstr(s <= quicksum([self.mvars[i][v] for v in range(n_vertices)]))
-        obj_expr.add(k/n_vertices * s)
+        
+        s_coef = 1/n_vertices if overlap else k/n_vertices
+        obj_expr.add(s_coef * s)
         
         self.model.setObjective(obj_expr, GRB.MAXIMIZE)
         self.model.params.OutputFlag = self.verbosity

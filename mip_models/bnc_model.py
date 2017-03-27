@@ -136,7 +136,9 @@ class Bnc_Model(object):
         model.update()
         for i in range(k):
             model.addConstr(s <= quicksum([mvars[i][v] for v in range(n_vertices)]))
-        obj_expr.add(k/n_vertices * s)
+        
+        s_coef = 1/n_vertices if overlap else k/n_vertices
+        obj_expr.add(s_coef * s)
         
         model.setObjective(obj_expr, GRB.MAXIMIZE)
         model.params.OutputFlag = self.verbosity
