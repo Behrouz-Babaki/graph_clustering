@@ -123,7 +123,7 @@ cluster $i$. We know that each vertex is assigned to exactly one
 cluster. This can be enforced by the following set of constraints:
 
 \begin{equation}
-\sum_{i=1}^k x_{ij} = 1 \quad \forall j \in \{1, \ldots, |V|\} \\
+\sum_{i=1}^k x_{ij} = 1 \quad \forall j \in \{1, \ldots, |V|\} \label{cons:assign}\\
 \end{equation}
 
 To include the penalties in the model, we introduce additional
@@ -171,13 +171,48 @@ below:
 & s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}                                  
 \end{align}
 
-About overlapping clusters and breaking symmetries \ldots
+\subsection{Overlapping clusters}
+Sometimes we can allow a node to be included in more than one cluster. For example in our motivating application, \ldots. 
+
+To modify our formulation to allow for overlapping clusters we need to ensure that each node is included in \emph{at least} one cluster. To apply this modification to our formulation, we only need to replace constraints~\ref{cons:assign} with the following inequalities:
+
+\begin{equation}
+\sum_{j=1}^{k} x_{ij} \geq 1 \qquad i \in \{1, \ldots, |V| \}
+\end{equation}
+
+\subsection{Breaking symmetries}
+Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two options to reduce these symmetries: 1) Assign label one to the cluster that contains node one. 2) Assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
+
+\begin{align}
+&x_{11} = 1 \\
+&\sum_{i=1}^{|V|} x_{ij} \leq \sum_{i=1}^{|V|} x_{i,j+1} \qquad j \in \{2, \ldots, k\}
+\end{align}
+
+These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint.
 
 \subsection{Enumerating all paths}
+A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \iff \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
+
+\begin{equation}
+0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
+\end{equation}
+
+Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of nodes that lie between $u$ and $v$ on $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
+\begin{multline}
+0 \leq \sum_{i\in I_r} x_{ij} - |I_r| y_{rj} \leq |I_r| - 1 \\
+\forall j \in \{1, \ldots, k\}, \forall u, v \in V, (u, v) \notin E, \\ \forall r \in \{1, \ldots, |P_{uv}\}
+\end{multline}
+
+Finally, we can encode the connectivity condition by adding the following constraints:
+
+\begin{multline}
+x_{uj} + x_{vj} \leq \sum_{r=1}^{|P_{uv}|} y_{rj} + 1 \\
+\forall u, v \in V, (u, v) \notin E, \forall j \in \{1, \ldots, k\}
+\end{multline}
 
 \subsection{A cutting-plane approach}
  The contents of this
