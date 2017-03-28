@@ -30,7 +30,7 @@ VUB, Belgium}}
 \maketitle
 
 \begin{abstract}
-\lipsum[1]
+Representing the relationships among instances as a graph is a common practice in bio-informatics. These relationships should be taken into account in the data analysis. Including these relationships in a clustering task amounts to a graph partitioning problem. In this paper, we introduce a new graph partitioning problem with applications in analysis of biological networks. We present two mixed integer programming formulations for this problem. We also present a branch-and-price algorithm to deal with the exponential number of constraints. The experiments suggest that this approach scales to the real-world instances.
 \end{abstract}
 
 \section{Introduction}
@@ -324,7 +324,16 @@ practices in our implementation.
 \section{Experiments}
 \label{sec:experiments}
 
-\subsection{Implementation details}
+In this section we will evaluate the suitability of our algorithms to address the motivating application. In particular, we want to answer these three questions:
+
+\begin{description}
+\item[Q1.] How does each of the two models scale in the task of overlapping clustering?
+\item[Q2.] How does each of the two models scale in the task of non-overlapping clustering?
+\item[Q3.] What is the effect of the $\gamma$ parameter on the trade-off between the two components of the objective function?
+\end{description}
+
+
+\subsection{Experiment setting}
 We implemented our branch-and-cut algorithm using the python interface
 of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the
 implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11}\footnote{networkx.github.io} library. To use this implementation for our problem, we replaced
