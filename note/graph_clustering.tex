@@ -100,6 +100,20 @@ Consider a sub-graph of the human interaction network containing only those gene
 %This evolutionary property can be exploited to understand cancer mechanisms and identify driver mutations by searching for groups of genes that display mutual exclusivity with each other (i.e. groups of genes which have mostly one mutation per tumor).
 %A first series of methods that analyze gene sets assume that, because of the clonal properties of cancer cells, recurrent mutations should occur at the pathway level rather than at single gene level. These methods search for
 
+\begin{figure}
+\centering
+\begin{minipage}{.5\linewidth}
+\centering
+\includegraphics[scale=0.7]{images/interaction}
+\end{minipage}%
+\begin{minipage}{.5\linewidth}
+\centering
+\includegraphics[scale=0.7]{images/interaction_clusters}
+\end{minipage}
+\captionsetup{font=small,margin=10pt}
+\captionof{figure}{(left) The interaction subgraph. (right) the pathways.}
+\label{fig:minimal}
+\end{figure}
 
 
 \section{Problem definition}
@@ -231,10 +245,11 @@ Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nod
 
 A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its nodes. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
 
-\begin{SCfigure}[1.4]
+\begin{SCfigure}[1.2]
 \centering
 \includegraphics[scale=0.7]{images/cutset}
-\caption{The sets \{2, 5\} and \{3, 5\} belong to $\Gamma(1, 4)$, but the set \{2, 3, 5\} does not.}
+\captionsetup{font=small}
+\captionof{figure}{The sets \{2, 5\} and \{3, 5\} belong to $\Gamma(1, 4)$, but the set \{2, 3, 5\} does not.}
 \label{fig:cutset}
 \end{SCfigure}
 
