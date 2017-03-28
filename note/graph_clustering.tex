@@ -167,14 +167,14 @@ The model that we defined in this section is presented
 below:
 
 \begin{align}
-& \text{maximize} \quad s + \gamma \sum_{i=1}^{k} \sum_{(w, u, v) \in C} w  y_{iuv}  \\
+& \text{maximize} \quad s + \gamma \sum_{j=1}^{k} \sum_{(w, u, v) \in C} w  y_{uvj}  \\
 &\textit{s.t.}                                                                       \nonumber \\
-&\sum_{i=1}^k x_{ij} = 1                                                             \forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \geq x_{iu} + x_{iv} -1                                                    \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
-& s \leq \sum_{i=1}^{|V|} x_{ij}                                                     \forall i \in \{1, \ldots, k\} \\
-& \mathsf{connected}(x_{i1}, \ldots, x_{i|V|})                                       \forall i \in \{1, \ldots, k\} \\
-& x_{ij} \in \{0, 1\}                                                                \forall i \in \{1, \ldots, k\}, \forall j \in \{1, \ldots, |V|\} \\
-& y_{iuv} \in \{0, 1\}                                                               \forall i \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+&\sum_{j=1}^k x_{ij} = 1                                                             \forall i \in \{1, \ldots, |V|\} \\
+& y_{uvj} \geq x_{uj} + x_{vj} -1                                                    \forall j \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
+& s \leq \sum_{i=1}^{|V|} x_{ij}                                                     \forall j \in \{1, \ldots, k\} \\
+& \mathsf{connected}(x_{1j}, \ldots, x_{|V|j})                                       \forall j \in \{1, \ldots, k\} \\
+& x_{ij} \in \{0, 1\}                                                                \forall j \in \{1, \ldots, k\}, \forall i \in \{1, \ldots, |V|\} \\
+& y_{uvj} \in \{0, 1\}                                                               \forall j \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
 & s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}                                  
 \end{align}
 
@@ -199,7 +199,7 @@ These constraints do not eliminate all symmetries (especially in the case of ove
 
 \section{Enforcing connectivity}
 \label{sec:connectivity}
-In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$. In this section we present a method for enforcing this constraint.
+In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present a method for enforcing this constraint.
 
 \subsection{Enumerating all paths}
 A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \iff \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
@@ -229,7 +229,7 @@ section are a slight modification of the methods presented in~\cite{CarvajalCGVW
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
 \end{definition}
 
-A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its vertices. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
+A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its nodes. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
 
 \begin{SCfigure}[1.4]
 \centering
@@ -242,17 +242,17 @@ A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing an
 Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
 \end{theorem}
 
-Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{i1}, \ldots, x_{i|V|})$ can be formulated as follows:
+Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ can be formulated as follows:
 
 \begin{multline}
-\sum_{w \in S} x_{iw} \geq x_{iu} + x_{iv} - 1 \\
+\sum_{w \in S} x_{wj} \geq x_{uj} + x_{vj} - 1 \\
 \forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
 \label{eq:connectivity}
 \end{multline}
 
 This formulation adds an exponential number of inequalities to the
 problem, which makes it impractical for all graphs but those with only a
-few vertices. To resolve this problem, we use the \emph{cutting-plane}
+few nodes. To resolve this problem, we use the \emph{cutting-plane}
 method. A rough description of this method follows: We start by
 including a (possibly empty) subset of these constraints and solve the
 problem to optimality. The we check to see if the solution satisfies the
@@ -270,8 +270,8 @@ constraint.
 
 Luckily, for the connectivity constraints, the separation problem can be
 solved efficiently. Given a solution of the problem, the
-separation problem for cluster $i$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. Find vertices $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{iw}^*$ is
-minimum among all sets $S \in \Gamma(u, v)$. If $\sum_{w \in S^*} x_{iw}^* < x^*_{iu} + x^*_{iv} - 1$ then the equality~\ref{eq:connectivity}
+separation problem for cluster $j$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. Find nodes $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{wj}^*$ is
+minimum among all sets $S \in \Gamma(u, v)$. If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity}
 induced by $u, v, S^*$ is violated. We solve this separation problem
 once for each cluster and add the violated constraints to the problem.
 If no such violated constraint is found, then the solution is optimal.
@@ -294,11 +294,11 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \label{alg:cut}
 \begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$
-\For{$i \in \{1, \ldots, k\}$}
+\For{$j \in \{1, \ldots, k\}$}
 	\For{$u, v$ such that $(u, v) \notin E$}
-		\State $S^* \gets \text{min-cut}(u, v, x^{*i})$ 
-		\If{$\sum_{w \in S^*} x_{iw}^* < x_{iu}^* + x_{iv}^* - 1$}
-			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{iw} \geq x_{iu} + x_{iv} - 1\}$ 
+		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_j)$ 
+		\If{$\sum_{w \in S^*} x_{wj}^* < x_{uj}^* + x_{vj}^* - 1$}
+			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$ 
 		\EndIf
 	\EndFor
 \EndFor
