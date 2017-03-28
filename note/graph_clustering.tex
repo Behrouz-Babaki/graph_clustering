@@ -95,6 +95,21 @@ The main difference of our problem with the existing problems is that the edges 
 \section{Motivating application}
 \label{sec:motivation}
 
+Cancer sequencing has become fairly commonplace, enabling the genome-wide measurement of somatic mutations across large groups of cancer patients.
+The key challenges when interpreting these data are to detect the genes that affect the creation and development of cancer and to gain an understanding of how they interact with one another.
+
+Initially, the main was focus was placed on solely detecting the key driver mutations. More recently \cite{}, methods have been development that aim to exploit the information contained in the human interaction network. By incorporating such biological pathway information, a superior selection and understanding of genes and their interactions becomes possible. These new methods do introduce new challenges. While the extracted genes and interactions may prove statistically relevant across a large set of patients, the underlying mechanisms that affect individual patients can not always be easily distinguished, as these pathways might connect to one another or potentially overlap.
+
+However, it is known that the creation and growth of tumors follows a clonal evolutionary model. For a tumor this means that following the disruption of a single gene, a fitness increase is no longer received when disrupting additional genes in the triggered pathway. As such, multiple mutations within a single pathway are often redundant, and consequently less commonly observed on the level of individual patients. This property can be exploited to distinguish pathways from one another.
+
+
+Consider a sub-graph of the human interaction network containing only those genes and interactions that were identified as being highly relevant to a particular cancer. Each node represents a gene or gene product, and each edge represent an interaction between a pair of nodes. The graph may consist of multiple connected components. It is our goal to separate distinct pathways from each of these components. Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
+
+%This evolutionary property can be exploited to understand cancer mechanisms and identify driver mutations by searching for groups of genes that display mutual exclusivity with each other (i.e. groups of genes which have mostly one mutation per tumor).
+%A first series of methods that analyze gene sets assume that, because of the clonal properties of cancer cells, recurrent mutations should occur at the pathway level rather than at single gene level. These methods search for
+
+
+
 \section{Problem definition}
 \label{sec:definition}
 
