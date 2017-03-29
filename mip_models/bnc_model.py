@@ -3,6 +3,7 @@
 from __future__ import print_function, division
 from gurobipy import Model, GRB, quicksum, LinExpr, GurobiError
 import networkx as nx
+from networkx.algorithms.flow import edmonds_karp
 
 class Cut_Finder(object):
     def __init__(self, ingraph_nnodes, ingraph_edges):
@@ -29,7 +30,9 @@ class Cut_Finder(object):
     
     def find_cutset(self, in1, in2):
         try:
-            _, (reachable, non_reachable) = nx.minimum_cut(self.G, in1*2+1, in2*2)
+            _, (reachable, non_reachable) = nx.minimum_cut(self.G, 
+                                                           in1*2+1, in2*2,
+                                                           flow_func=edmonds_karp)
         except nx.NetworkXUnbounded:
             print('unbounded flow for nodes %d and %d'%(in1, in2))
         cutset = set()
