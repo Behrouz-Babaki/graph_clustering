@@ -32,7 +32,6 @@ class Basic_Model(object):
                     n = len(node_set)
                     for i in range(self.k):
                         var = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                        self.model.update()
                         ns_vars = [self.mvars[i][j] for j in node_set]
                         self.node_set_vars[(node_set, i)] = var
                         self.model.addConstr(quicksum(ns_vars) - n*var <= n-1)
@@ -59,6 +58,7 @@ class Basic_Model(object):
         self.create_graph()
         
         self.model = Model('graph_clustering')
+        self.model.params.updatemode = 1
         
         self.mvars = []
         for i in range(k):
@@ -67,7 +67,6 @@ class Basic_Model(object):
                 v = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
                 cvars.append(v)
             self.mvars.append(cvars)
-        self.model.update()
  
         ineq_sense = GRB.GREATER_EQUAL if overlap else GRB.EQUAL
         # constraint: each vertex in exactly/at least one cluster
@@ -101,13 +100,11 @@ class Basic_Model(object):
         for (u, v, w) in constraints:
             for i in range(k):
                 y = self.model.addVar(lb=0.0, ub=1.0, vtype=GRB.BINARY)
-                self.model.update()
                 self.model.addConstr(y >= self.mvars[i][u] + self.mvars[i][v] - 1)
                 obj_expr.add(y, -w * gamma)
         
         # size of smallest cluster 
         s = self.model.addVar(lb=0.0, ub=n_vertices, vtype=GRB.INTEGER)
-        self.model.update()
         for i in range(k):
             self.model.addConstr(s <= quicksum([self.mvars[i][v] for v in range(n_vertices)]))
         
@@ -115,6 +112,7 @@ class Basic_Model(object):
         obj_expr.add(s_coef * s)
         
         self.model.setObjective(obj_expr, GRB.MAXIMIZE)
+        self.model.update()
         self.model.params.OutputFlag = self.verbosity
                
     def check_graph(self, n_vertices, edges):
