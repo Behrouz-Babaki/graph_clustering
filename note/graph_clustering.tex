@@ -46,7 +46,7 @@ of a graph, the clustering task is also called \emph{graph
 network analysis and bioinformatics, it is not a surprise to see
 numerous applications of graph partitioning in these fields. However,
 graph partitioning has also applications in route planning, image
-processing, VLSI design, and parallel processing~\cite{Survey}.
+processing, VLSI design, and parallel processing~\cite{BulucMSS016}.
 
 Motivated by an application in the analysis of biological networks, we
 introduce the following graph partitioning problem: Given a Graph
@@ -60,7 +60,7 @@ weight of penalties should be as small as possible.
 We formulate this problem as mixed integer programming (MIP)
 problem. Recently, there has been an interest in such
 approaches from the \emph{declarative data mining}
-perspective~\cite{vran,me}. This perspective encourages formulating
+perspective~\cite{DaoDV13}. This perspective encourages formulating
 data mining problems as models in constraint satisfaction/optimization
 frameworks (e.g. constraint programming and integer programming). One
 of the motivations for doing so is that existing algorithms can be
@@ -370,13 +370,13 @@ The code and the data will be made available upon publication of this paper.
 \label{sec:related}
 There are several studies that using mathematical programming
 for clustering and graph partitioning
-problems~\cite{HansenJ97}. In addition to integer linear programming, semidefinite programming~\cite{ArmbrusterFHM08}, and quadratic programming~\cite{FanP10} formulations has also been used for solving these problems. Techniques such as branch-and-cut~\cite{REF} and branch-and-price~\cite{REF} have been used to improve the performance. 
+problems~\cite{HansenJ97}. In addition to integer linear programming, semidefinite programming~\cite{ArmbrusterFHM08,LisserR03}, and quadratic programming~\cite{FanP10} formulations has also been used for solving these problems. Techniques such as branch-and-cut~\cite{FerreiraMSWW98,GrotschelW89} and branch-and-price~\cite{MehrotraT98,JiM07} have been used to improve the performance. 
 
-The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem~\cite{REF}. In most variants of graph partitioning, the edges are assumed to be weighted~\cite{REF}. The number of clusters can be specified by user~\cite{REF} or decided by the algorithm. Two most prominent objective functions are 1) minimizing the total weight of the edges that have endpoints in different clusters~\cite{REF} and 2) minimizing the total weight fo the edges that have endpoints in the same cluster~\cite{REF}. Both these objectives are meant to increase the homogeneity of clusters.  
+The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem. In most variants of graph partitioning problem, the edges, nodes, or both are weighted. The number of clusters can be specified by user or decided by the algorithm. Two most prominent types of objective functions are 1) the total weight of the edges that have endpoints in different clusters and 2) the total weight fo the edges that have endpoints in the same cluster. Depending on the meaning of the weights, these function are minimized or maximized. In either case, these objectives are meant to increase the homogeneity of clusters.  
 
-Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{REF}. Other types of constraints include constraint on the minimum size of a cluster~\cite{REF}, upper and lower bounds on size of clusters~\cite{REF}, and constraints on total weight of nodes in a cluster~\cite{REF}. 
+Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{LabbeO10}. Other types of constraints include constraint on the size of clusters~\cite{FanP10}, and constraints on total weight of nodes in a cluster~\cite{FerreiraMSWW98}. 
 
-The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{connected} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
+The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{Benati2017} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
 
 
 \section{conclusions and future work}
