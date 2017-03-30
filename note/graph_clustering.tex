@@ -90,19 +90,13 @@ discussions. We review the related literature in section~\ref{sec:related}, and 
 Cancer sequencing has become fairly commonplace, enabling the genome-wide measurement of somatic mutations across large groups of cancer patients.
 The key challenges when interpreting these data are to detect the genes that affect the creation and development of cancer and to gain an understanding of their interaction.
 
-Initially, the main focus by the community was solely on the detection of key driver mutations. Since the long tail of the frequency distribution of somatically mutated genes makes it challenging to detect rare mutations with high statistical significance, we have recently seen the rise of methods aiming to exploit the information contained in the human interaction network \cite{some_methods}. By incorporating such biological pathway information, a superior selection and understanding of genes and their interactions is possible. These new methods do introduce novel challenges. We note that the underlying mechanisms that affect individual patients can not always be easily distinguished from the extracted sub-graphs. More specifically, it is the case that the pathways contained in these sub-graphs may be connected to one another or even overlap.
+Initially, the main focus by the community was solely on the detection of key driver mutations. Since the long tail of the frequency distribution of somatically mutated genes makes it challenging to detect rare mutations with high statistical significance, we have recently seen the rise of methods aiming to exploit the information contained in the human interaction network \cite{some_methods}. By incorporating such biological pathway information, a superior selection and understanding of genes and their interactions is possible. These new methods do introduce novel challenges. We notice that the underlying mechanisms that affect individual patients are not always easily distinguishable from the extracted subgraphs. More specifically, it is the case that the pathways contained in these subgraphs may be connected to one another or even overlap.
 
-However, it is known that the creation and growth of tumors follows a clonal evolutionary model. For a tumor this means that after disrupting a single gene, a fitness increase may no longer be received when disrupting additional genes in that gene's associated pathways. Because of this, multiple mutations within a single pathway are often redundant, and consequently less commonly observed within individual patients. This property can be exploited to distinguish pathways from one another.
+However, it is known that the creation and growth of tumors follows a clonal evolutionary model. For a tumor this means that after disrupting a single gene, a fitness increase may no longer be received when disrupting additional genes in that gene's associated pathways. Because of this, multiple mutations within a single pathway are often redundant, and consequently less commonly observed within individual patients. In the presence of patient-mutation data, this property allows us to distinguish pathways from one another by enforcing that individual patients have as few mutations as possible assigned to one and the same pathway.
 
-As such there exists a demand for a method that can 
+As such there exists a demand for a method that can perform overlapping clustering in the presence of can-not-link constraints, where each cluster forms a connected component.
 
-Consider a sub-graph of the human interaction network containing only those genes and interactions that were identified as being highly relevant to a particular cancer. Each node represents a gene or gene product, and each edge represent an interaction between a pair of nodes. The graph may consist of multiple connected components. It is our goal to separate distinct pathways from each of these components. Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
-
-
-----> thus we have a need for a method that can do this and that.
-
-%This evolutionary property can be exploited to understand cancer mechanisms and identify driver mutations by searching for groups of genes that display mutual exclusivity with each other (i.e. groups of genes which have mostly one mutation per tumor).
-%A first series of methods that analyze gene sets assume that, because of the clonal properties of cancer cells, recurrent mutations should occur at the pathway level rather than at single gene level. These methods search for
+%Consider a subgraph of the human interaction network containing only those genes and interactions that were identified as being highly relevant to a particular cancer. Each node represents a gene or gene product, and each edge represent an interaction between a pair of nodes. The graph may consist of multiple connected components. It is our goal to separate distinct pathways from each of these components. Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
 
 \begin{figure}
 \centering
@@ -119,7 +113,7 @@ Consider a sub-graph of the human interaction network containing only those gene
 \includegraphics[scale=0.6]{images/interaction_overlap}
 \end{minipage}
 \captionsetup{font=small,margin=10pt}
-\captionof{figure}{(left) The interaction subgraph. Dashed lines represent the can-not-link constraints. (middle) the pathways obtained from non-overlapping clusters (right) the pathways obtained from overlapping clusters.}
+\captionof{figure}{(left) A small subgraph extracted from the interaction network. Dashed lines represent the can-not-link constraints. (middle) the pathways obtained from non-overlapping clusters (right) the pathways obtained from overlapping clusters.}
 \label{fig:minimal}
 \end{figure}
 
@@ -129,9 +123,14 @@ Consider a sub-graph of the human interaction network containing only those gene
 
 We assume that the reader is familiar with basic graph theory. Here we quickly review some important basic notions: A graph $G=(V, E)$ consists of a set of nodes $G$ and a set of edges $E$. A graph is \emph{simple} if it does not have any loops or double edges. A graph is \emph{connected} if there is a path between each pair of its nodes. The nodes on a path except the first and last ones are called the \emph{intermediate nodes}. A \emph{simple path} is a path with no cycles. The induced subgraph of $G$ on a set of nodes $W$ has $W$ as its node-set and contains those edges in $G$ which have both endpoints in $W$. 
 
-Consider a simple undirected graph $G=(V, E)$. Our goal is to partition $V$
+
+%containing only those genes and interactions that were identified as being highly relevant to a particular cancer. 
+% Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
+
+
+Consider a simple undirected graph $G=(V, E)$ where vertices represent genes, and edges represent interactions between those genes. Our goal is to partition $V$
 into $k$ subsets (called \emph{clusters} from now on), such that the
-subgraph induced by each subset is connected. Our preference is to avoid
+subgraph induced by each subset is connected. These represent the pathways we seek to identify. Our preference is to avoid
 having clusters that contain only a small number of nodes. To enforce
 this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
@@ -201,7 +200,7 @@ below:
 \end{align}
 
 \subsection{Overlapping clusters}
-Sometimes we can allow a node to be included in more than one cluster. For example in our motivating application, \ldots. 
+Sometimes we can allow a node to be included in more than one cluster. For example, in our motivating application it is the case that a gene can serve as an essential part of different pathways. 
 
 To modify our formulation to allow for overlapping clusters we need to ensure that each node is included in \emph{at least} one cluster. To apply this modification to our formulation, we only need to replace constraints~\ref{cons:assign} with the following inequalities:
 
@@ -355,7 +354,7 @@ value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
 
-We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of sub-graphs representative of the graphs encountered in this application.
+We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in this application.
 
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
 
