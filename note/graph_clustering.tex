@@ -171,7 +171,7 @@ will automatically fix $y_{uvj}$ to zero in such cases.
 
 Finally, we introduce an integer variable $s$ which represents the size
 of the smallest cluster. The domain of $s$ is
-$\{0, \ldots, \lceil \frac{|V|}{k} \rceil \}$. The following constraints
+$\{0, \ldots, \lfloor \frac{|V|}{k} \rfloor \}$. The following constraints
 ensure that $s$ represents the size of the smallest cluster:
 
 \begin{align}
@@ -188,7 +188,7 @@ The model that we defined in this section is presented
 below:
 
 \begin{align}
-& \text{maximize} \quad s + \gamma \sum_{j=1}^{k} \sum_{(w, u, v) \in C} w  y_{uvj}  \\
+& \text{maximize} \quad s - \gamma \sum_{j=1}^{k} \sum_{(w, u, v) \in C} w  y_{uvj}  \\
 &\textit{s.t.}                                                                       \nonumber \\
 &\sum_{j=1}^k x_{ij} = 1                                                             \forall i \in \{1, \ldots, |V|\} \\
 & y_{uvj} \geq x_{uj} + x_{vj} -1                                                    \forall j \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
@@ -196,7 +196,7 @@ below:
 & \mathsf{connected}(x_{1j}, \ldots, x_{|V|j})                                       \forall j \in \{1, \ldots, k\} \\
 & x_{ij} \in \{0, 1\}                                                                \forall j \in \{1, \ldots, k\}, \forall i \in \{1, \ldots, |V|\} \\
 & y_{uvj} \in \{0, 1\}                                                               \forall j \in \{1, \ldots, k\}, \forall (u, v) \in E_{C} \\
-& s \in \{0, \ldots, \lceil \frac{|V|}{k} \rceil \}                                  
+& s \in \{0, \ldots, \lfloor \frac{|V|}{k} \rfloor \}                                  
 \end{align}
 
 \subsection{Overlapping clusters}
@@ -341,7 +341,7 @@ In this section we will evaluate the suitability of our algorithms to address th
 
 \subsection{Experiment setting}
 We ran the experiments on Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the python interface
-of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11}\footnote{networkx.github.io} library. 
+of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. 
 
 To use this implementation for our problem, we replaced
 each undirected edge by two opposite directed edges. The capacity of
