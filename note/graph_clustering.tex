@@ -223,7 +223,7 @@ These constraints do not eliminate all symmetries (especially in the case of ove
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present two methods for enforcing these constraints.
 
 \subsection{Enumerating all paths}
-A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \iff \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
+A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \Leftrightarrow \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
 
 \begin{equation}
 0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
@@ -265,9 +265,10 @@ A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing an
 
 \begin{theorem}
 Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
+\label{theorem:cutset}
 \end{theorem}
 
-Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ can be formulated as follows:
+For a pair of non-adjacent nodes $u$ and $v$, let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ can be formulated as follows:
 
 \begin{multline}
 \sum_{w \in S} x_{wj} \geq x_{uj} + x_{vj} - 1 \\
@@ -275,9 +276,13 @@ Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then 
 \label{eq:connectivity}
 \end{multline}
 
+which is a standard translation of the following condition to linear inequalities:
 
+\begin{equation*}
+(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
+\end{equation*}
 
-Luckily, for the connectivity constraints, the separation problem can be
+This formulation adds an exponential number of constraints to the problem. Luckily, for the connectivity constraints, the separation problem can be
 solved efficiently. Given a solution of the problem, the
 separation problem for cluster $j$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. Find nodes $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{wj}^*$ is
 minimum among all sets $S \in \Gamma(u, v)$. If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity}
