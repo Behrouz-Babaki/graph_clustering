@@ -50,7 +50,7 @@ processing, VLSI design, and parallel processing~\cite{BulucMSS016}.
 
 Motivated by an application in the analysis of biological networks, we
 introduce the following graph partitioning problem: Given a Graph
-$G=(V, E)$ and a positive integer $k$, partition the graph into $k$
+and a positive integer $k$, partition the graph into $k$
 connected components. We also assume that there are a set of penalties
 for co-membership of certain pairs of nodes in the same cluster. We
 desire two properties for the output partitioning: First, we want to
@@ -69,7 +69,7 @@ extended to new problems by modification of addition of constraints.
 We have two contributions in this paper:
 \begin{itemize}
 \item We identify a new graph partitioning problem with applications in analysis of biological networks, and present a MIP formulation for solving it. 
-\item We present a branch-and-price algorithm to improve the performance and scalability of our method. 
+\item We present a branch-and-cut algorithm to improve the performance and scalability of our method. 
 \end{itemize}
 
 The rest of this paper is structured as follows:  In
@@ -221,7 +221,7 @@ These constraints do not eliminate all symmetries (especially in the case of ove
 
 \section{Enforcing connectivity}
 \label{sec:connectivity}
-In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present a method for enforcing this constraint.
+In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present two methods for enforcing these constraints.
 
 \subsection{Enumerating all paths}
 A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \iff \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
@@ -243,7 +243,10 @@ x_{uj} + x_{vj} \leq \sum_{r=1}^{|P_{uv}|} y_{rj} + 1 \\
 \forall u, v \in V, (u, v) \notin E, \forall j \in \{1, \ldots, k\}
 \end{multline}
 
-\subsection{A cutting-plane approach}
+\subsection{A cutting plane approach}
+
+Sometimes a MIP problem has too many constraints to be included in the formulation. However, given an objective function, it is possible that only a manageable subset of these constraints are active at the optimal solution. The \emph{cutting plane} algorithm tries to approximate this subset incrementally: Starting with a (possibly empty) subset of the constraints, a violated constraint is added and the problem is solved until there exists no such constraint. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+
  The contents of this
 section are a slight modification of the methods presented in~\cite{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
 
@@ -273,23 +276,7 @@ Let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then 
 \label{eq:connectivity}
 \end{multline}
 
-This formulation adds an exponential number of inequalities to the
-problem, which makes it impractical for all graphs but those with only a
-few nodes. To resolve this problem, we use the \emph{cutting-plane}
-method. A rough description of this method follows: We start by
-including a (possibly empty) subset of these constraints and solve the
-problem to optimality. The we check to see if the solution satisfies the
-connectivity constraints. If it does, then this solution is also the
-optimal solution for the original problem. Otherwise, we add (some of)
-the violated constraints to the problem and repeat this procedure, until
-all connectivity constraints are satisfied.
 
-Note that we need a means to detect which constraints are violated by
-the current solution. Since we do not want to enumerate an exponential
-number of constraints, this question gives rise to another search
-problem (called the \emph{separation} problem). The separation problem
-is usually formulated as that of finding the \emph{most violated}
-constraint.
 
 Luckily, for the connectivity constraints, the separation problem can be
 solved efficiently. Given a solution of the problem, the
