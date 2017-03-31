@@ -229,39 +229,47 @@ Clustering problems often have an inherent symmetry which is due to the fact tha
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
-\section{Enforcing connectivity}
-
 \NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
 
+\section{Enforcing connectivity}
 \label{sec:connectivity}
-In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present two methods for enforcing these constraints.
 
-\subsection{Enumerating all paths}
-A cluster is connected if and only if there is a path between each pair of its nodes. Therefore a pair of non-adjacent nodes can belong to the same cluster only if there is at least one path between them such that all nodes on this path belong to that cluster. To encode this condition in terms of linear constraints, we will enumerate all simple paths that connect each pair of non-adjacent nodes. Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of nodes that lie between $u$ and $v$ on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \Leftrightarrow \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
+In this section we give a concrete definition of the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. For a cluster to be connected, for each pair of points belonging to the cluster there should exist at least one path between these two nodes such that all nodes on this path also belong to this cluster. In section~\ref{sec:enumerate} we enforce this condition by explicitly enumerating all simple paths between each pair of non-adjacent nodes in the graph and adding variables and constraints for these paths. However, the exponential number of added constraints and variables limits the scalability of this method.
+
+Despite the exponential number of constraints, given an objective function it is likely that only a manageable subset of these constraints are active at the optimal solution. The \emph{cutting plane} algorithm is a method that tries to approximate this subset incrementally. In section~\ref{sec:bnc} we introduce another formulation for the connectivity constraint which again amounts to an exponential number of linear constraints, but lends itself better to the requirements of the cutting plane method.
+
+\subsection{Enumerating all simple paths}
+\label{sec:enumerate}
+
+Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of the intermediate nodes on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \Leftrightarrow \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
 
 \begin{equation}
 0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
 \end{equation}
 
-Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of nodes that lie between $u$ and $v$ on $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
+TODO connect \ldots
+
+Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
 \begin{multline}
 0 \leq \sum_{i\in I_r} x_{ij} - |I_r| y_{rj} \leq |I_r| - 1 \\
-\forall j \in \{1, \ldots, k\}, \forall u, v \in V, (u, v) \notin E, \\ \forall r \in \{1, \ldots, |P_{uv}\}
+\forall j \in \{1, \ldots, k\}, \forall u, v \in V, (u, v) \notin E, \\ \forall r \in \{1, \ldots, |P_{uv}|\}
+\label{cons:path}
 \end{multline}
 
 Finally, we can encode the connectivity condition by adding the following constraints:
 
+TODO explain why \ldots
 \begin{multline}
-x_{uj} + x_{vj} \leq \sum_{r=1}^{|P_{uv}|} y_{rj} + 1 \\
+x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
 \forall u, v \in V, (u, v) \notin E, \forall j \in \{1, \ldots, k\}
+\label{cons:pconnect}
 \end{multline}
 
 \subsection{A cutting plane approach}
-
-Sometimes a MIP problem has too many constraints to be included in the formulation. However, given an objective function, it is possible that only a manageable subset of these constraints are active at the optimal solution. The \emph{cutting plane} algorithm tries to approximate this subset incrementally: Starting with a (possibly empty) subset of the constraints, a violated constraint is added and the problem is solved until there exists no such constraint. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
-
- The contents of this
-section are a slight modification of the methods presented in~\cite{CarvajalCGVW13}. The presented formulation of connectivity constraints is mainly based on the notion of \emph{node-cut sets}, which we define next. 
+\label{sec:bnc}
+ We first review the basics of the cutting plane method: First starting with a (possibly empty) subset of the constraints, a violated constraint is added and the problem is solved until there exists no such constraint. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+ 
+ Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The definition and algorithms in this section are taken from~\cite{CarvajalCGVW13}.
 
 \begin{definition}[Node-cut set]
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
@@ -323,10 +331,10 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$
 \For{$j \in \{1, \ldots, k\}$}
-	\For{$u, v$ such that $(u, v) \notin E$}
+	\For{$u, v$ such that $(u, v) \notin E$ and $x_{uj}^* + x_{vj}^* > 1$}
 		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_j)$ 
 		\If{$\sum_{w \in S^*} x_{wj}^* < x_{uj}^* + x_{vj}^* - 1$}
-			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$ 
+			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$
 		\EndIf
 	\EndFor
 \EndFor
@@ -334,12 +342,6 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \end{algorithmic}
 \end{algorithm}
 
-Now observe that we do not need to wait for the problem to be solved to
-optimality to add the violated constraints. Instead, we can do so each
-time a feasible solution is found during the branch-and-bound procedure.
-We can also take a step further and solve the separation problem using
-the solution for the linear relaxation of the problem. We use both these
-practices in our implementation.
 
 \section{Experiments}
 \label{sec:experiments}
