@@ -8,6 +8,17 @@
 \usepackage{sidecap}
 \usepackage{lipsum}
 
+\usepackage[dvipsnames]{xcolor}
+\colorlet{lhue}{SpringGreen}
+\colorlet{mhue}{WildStrawberry}
+\colorlet{ghue}{CornflowerBlue}
+\colorlet{vhue}{Goldenrod}
+\usepackage[textsize=small,textwidth=15mm]{todonotes}
+\setlength{\marginparwidth}{15mm}
+\newcommand{\NDT}[1]{\todo[bordercolor=ghue,linecolor=ghue,color=ghue!40]{Tias: #1}}
+\newcommand{\NDTi}[1]{\todo[inline,bordercolor=ghue,color=ghue!40]{Tias: #1}}
+
+
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 
@@ -24,7 +35,7 @@ KU Leuven, Belgium}
 KU Leuven, Belgium}
 \and
 \IEEEauthorblockN{Tias Guns}
-\IEEEauthorblockA{Dept. Business, Technology, \\and Operations\\
+\IEEEauthorblockA{Dept. Business technology \\and Operations\\
 VUB, Belgium}}
 
 \maketitle
@@ -219,6 +230,9 @@ Clustering problems often have an inherent symmetry which is due to the fact tha
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
 \section{Enforcing connectivity}
+
+\NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
+
 \label{sec:connectivity}
 In the previous section we did not give a concrete formulation for the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. In this section we present two methods for enforcing these constraints.
 
