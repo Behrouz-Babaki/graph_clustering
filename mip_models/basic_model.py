@@ -146,4 +146,8 @@ class Basic_Model(object):
                         cluster.append(j)
                 clusters.append(cluster)
             self.clusters = clusters
+            
+    def print_stat(self):
+        pass
+
 

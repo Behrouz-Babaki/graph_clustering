@@ -95,6 +95,7 @@ if __name__ == '__main__':
         m = Basic_Model(**kwargs)
         
     m.solve()
+    m.print_stat()
     print(m.clusters)
     print(m.objective)
     print(m.runtime)
