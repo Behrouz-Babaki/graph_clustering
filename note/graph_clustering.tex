@@ -275,7 +275,7 @@ x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
 \end{definition}
 
-A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its nodes. Figure~\ref{fig:cutset} depicts the idea of a node-cut. The following theorem shows that connectivity of a graph can be characterized by its node-cut sets. 
+A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its nodes. For a pair of non-adjacent nodes $u$ and $v$, we denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Figure~\ref{fig:cutset} shows examples of minimal node-cut sets. The following theorem relates the connectivity of a graph to its minimal node-cut sets. 
 
 \begin{SCfigure}[1.2]
 \centering
@@ -290,19 +290,19 @@ Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exist
 \label{theorem:cutset}
 \end{theorem}
 
-For a pair of non-adjacent nodes $u$ and $v$, let us denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Then the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ can be formulated as follows:
+According to theorem~\ref{theorem:cutset} to ensure that cluster $j$ is connected, the following condition should hold for each $uv$-node cut $S$:
+
+\begin{equation*}
+(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
+\end{equation*}
+
+By translating this condition into linear constraints we can formulate the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ as follows:
 
 \begin{multline}
 \sum_{w \in S} x_{wj} \geq x_{uj} + x_{vj} - 1 \\
 \forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
 \label{eq:connectivity}
 \end{multline}
-
-which is a standard translation of the following condition to linear inequalities:
-
-\begin{equation*}
-(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
-\end{equation*}
 
 This formulation adds an exponential number of constraints to the problem. Luckily, for the connectivity constraints, the separation problem can be
 solved efficiently. Given a solution of the problem, the
