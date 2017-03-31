@@ -197,14 +197,15 @@ class Bnc_Model(object):
         self.mip_gap = self.model.mipgap
         self.objective = self.model.ObjVal
         
-        clusters = []
-        for i in range(self.k):
-            cluster = []
-            for j in range(self.n_vertices):
-                if abs(self.model._vars[i][j].x) > 1e-4:
-                    cluster.append(j)
-            clusters.append(cluster)
-        self.clusters = clusters
+        if self.model.solcount > 0:
+            clusters = []
+            for i in range(self.k):
+                cluster = []
+                for j in range(self.n_vertices):
+                    if abs(self.model._vars[i][j].x) > 1e-4:
+                        cluster.append(j)
+                clusters.append(cluster)
+            self.clusters = clusters
         
     def print_stat(self):
 
