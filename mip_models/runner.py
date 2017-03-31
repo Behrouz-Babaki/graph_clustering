@@ -100,7 +100,16 @@ if __name__ == '__main__':
         
     m.solve()
     m.print_stat()
+    print('clusters:')
     print(m.clusters)
-    print(m.objective)
-    print(m.runtime)
+
+    print('node count:', m.node_count)
+    print('mip gap:', m.mip_gap)
+    print('objective value:', m.objective)
+    print('runtime:', m.runtime)
+
+    if (m.optimal):
+        print('OPTIMAL')
+    else:
+        print('NOT OPTIMAL')
 

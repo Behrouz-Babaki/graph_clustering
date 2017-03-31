@@ -188,24 +188,24 @@ class Bnc_Model(object):
             self.model.optimize(mincut_callback)
         except GurobiError:
             print(GurobiError.message)
-        self.model._tree_finish = timer()
         
         self.objective = None
         self.clusters = None
         self.optimal = (self.model.Status == GRB.OPTIMAL)
         self.runtime = self.model.Runtime
+        self.node_count = self.model.nodecount
+        self.mip_gap = self.model.mipgap
+        self.objective = self.model.ObjVal
         
-        if self.optimal:
-            self.objective = self.model.ObjVal
-            clusters = []
-            for i in range(self.k):
-                cluster = []
-                for j in range(self.n_vertices):
-                    if abs(self.model._vars[i][j].x) > 1e-4:
-                        cluster.append(j)
-                clusters.append(cluster)
-            self.clusters = clusters
-            
+        clusters = []
+        for i in range(self.k):
+            cluster = []
+            for j in range(self.n_vertices):
+                if abs(self.model._vars[i][j].x) > 1e-4:
+                    cluster.append(j)
+            clusters.append(cluster)
+        self.clusters = clusters
+        
     def print_stat(self):
 
         print('separation time in root: %f' %self.model._root_cuttime)
