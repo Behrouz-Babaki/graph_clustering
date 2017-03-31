@@ -62,10 +62,6 @@ def mincut_callback(model, where):
 
     if model._impcounter < 10 and where == GRB.Callback.MIPNODE:
         if model.cbGet(GRB.Callback.MIPNODE_NODCNT) != 0: return
-        
-        if not model._root_started:
-            model._root_start = timer()
-            model._root_started = True
             
         start = timer()
         
@@ -84,12 +80,11 @@ def mincut_callback(model, where):
             for (u, v, cutset) in cutsets:
                 cutset_expr = quicksum(model._vars[i][j] for j in cutset)
                 model.cbCut(cutset_expr >= model._vars[i][u] + model._vars[i][v] - 1)
+            if model._single_cut and cutsets:
+                break
         model._root_cuttime += timer() - start
         
-    elif where == GRB.Callback.MIPSOL  and model._root_started:
-        if not model._tree_started:
-            model._tree_start = timer()
-            model._tree_started = True
+    elif where == GRB.Callback.MIPSOL:
             
         start = timer()
         
@@ -107,6 +102,7 @@ class Bnc_Model(object):
                  verbosity=0, 
                  symmetry_breaking=True,
                  overlap=False,
+                 single_cut=False,
                  timeout=None):
         self.check_graph(n_vertices, edges)
         self.n_vertices = n_vertices
@@ -169,14 +165,11 @@ class Bnc_Model(object):
         model._k = k
         model._relobj = None
         model._impcounter = 0
+        model._single_cut = single_cut
         
         # runtime information
         model._root_cuttime = 0
         model._tree_cuttime = 0
-        model._root_start = None
-        model._root_started = False
-        model._tree_start = None
-        model._tree_started = False
         
         self.model = model
                
@@ -214,11 +207,7 @@ class Bnc_Model(object):
             self.clusters = clusters
             
     def print_stat(self):
-        root_time = self.model._tree_start - self.model._root_start
-        tree_time = self.model._tree_finish - self.model._tree_start
 
-        print('total time in root: %f' %root_time)
-        print('total time in tree: %f' %tree_time)
         print('separation time in root: %f' %self.model._root_cuttime)
         print('separation time in tree: %f' %self.model._tree_cuttime)
 

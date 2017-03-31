@@ -69,6 +69,8 @@ if __name__ == '__main__':
                         help='disable symmetry breaking')
     parser.add_argument('--overlap', action='store_true',
                         help='allow overlap between clusters')
+    parser.add_argument('--single', action='store_true',
+                        help='add at most one cut per cluster')
     args = parser.parse_args()    
 
     n_vertices, edges, constraints, node_ids = read_graph(args.graph_file, 
@@ -79,6 +81,7 @@ if __name__ == '__main__':
     k = args.k
     gamma = args.gamma
     timeout = args.timeout
+    single_cut = args.single
     
     kwargs = dict(n_vertices=n_vertices, 
                   edges=edges, 
@@ -90,6 +93,7 @@ if __name__ == '__main__':
                   timeout=timeout)
     
     if args.method == 'bnc':
+        kwargs['single_cut'] = single_cut
         m = Bnc_Model(**kwargs)
     elif args.method == 'basic':
         m = Basic_Model(**kwargs)
