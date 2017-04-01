@@ -17,7 +17,8 @@
 \setlength{\marginparwidth}{15mm}
 \newcommand{\NDT}[1]{\todo[bordercolor=ghue,linecolor=ghue,color=ghue!40]{Tias: #1}}
 \newcommand{\NDTi}[1]{\todo[inline,bordercolor=ghue,color=ghue!40]{Tias: #1}}
-
+\newcommand{\NDB}[1]{\todo[bordercolor=mhue,linecolor=mhue,color=mhue!40]{Behrouz: #1}}
+\newcommand{\NDBi}[1]{\todo[inline,bordercolor=mhue,color=mhue!40]{Behrouz: #1}}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
@@ -147,12 +148,13 @@ this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
 $C = \{(u, v, w): u, v \in V, w \in \mathbb{R}^+\}$ which indicates that
 including $u$ and $v$ in the same cluster will induce a penalty of $w$. We denote all edges $(u, v)$ such that $(u, v, w) \in C$ by $E_C$. Our second goal is to minimize the sum of such penalties.
+\NDB{Find a better representation for cl}
 
 To include both goals in the objective function, assume that $S$ is the
 size of the smallest cluster and $W$ is the total penalty. We define the
-objective function as maximizing $S + \gamma W$ where $\gamma$ is a
-parameter specified by user which determines the relative importance of
-each of the two goals.
+objective function as maximizing $S - \gamma W$ where $\gamma$ is a
+positive parameter specified by user which determines the relative importance of each of the two goals.
+\NDB{Mention normalization}
 
 We can formulate this problem as an integer linear program. The main
 decision variables in this formulation are those that determine the
@@ -160,7 +162,7 @@ assignment of vertices to the clusters. In our formulation, the binary
 variable $x_{ij}$ indicates whether or not vertex $i$ is included in
 cluster $j$. We know that each vertex is assigned to exactly one
 cluster. This can be enforced by the following set of constraints:
-
+\NDB{Avoid $|V|$ throughout}
 \begin{equation}
 \sum_{j=1}^k x_{ij} = 1 \quad \forall i \in \{1, \ldots, |V|\} \label{cons:assign}\\
 \end{equation}
@@ -247,7 +249,7 @@ Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of 
 0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
 \end{equation}
 
-TODO connect \ldots
+\NDB{connect \ldots}
 
 Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
 \begin{multline}
@@ -258,7 +260,8 @@ Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a
 
 Finally, we can encode the connectivity condition by adding the following constraints:
 
-TODO explain why \ldots
+\NDB{explain why \ldots}
+
 \begin{multline}
 x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
 \forall u, v \in V, (u, v) \notin E, \forall j \in \{1, \ldots, k\}
@@ -267,9 +270,12 @@ x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
 
 \subsection{A cutting plane approach}
 \label{sec:bnc}
+
+ \NDB{Prune and revise}
  We first review the basics of the cutting plane method: First starting with a (possibly empty) subset of the constraints, a violated constraint is added and the problem is solved until there exists no such constraint. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+
  
- Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The definition and algorithms in this section are taken from~\cite{CarvajalCGVW13}.
+ Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The definition and theorems in this section are also taken from~\cite{CarvajalCGVW13}.
 
 \begin{definition}[Node-cut set]
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
@@ -291,7 +297,7 @@ Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exist
 \end{theorem}
 
 According to theorem~\ref{theorem:cutset} to ensure that cluster $j$ is connected, the following condition should hold for each $uv$-node cut $S$:
-
+\NDB{Define $x_{wj}$}
 \begin{equation*}
 (x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
 \end{equation*}
@@ -304,9 +310,11 @@ By translating this condition into linear constraints we can formulate the const
 \label{eq:connectivity}
 \end{multline}
 
+\NDBi{Revised up to here}
 This formulation adds an exponential number of constraints to the problem. Luckily, for the connectivity constraints, the separation problem can be
 solved efficiently. Given a solution of the problem, the
-separation problem for cluster $j$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. Find nodes $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{wj}^*$ is
+separation problem for cluster $j$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. \NDB{Define $\mathbf{x}^*$ and $\mathbf{x}_j^*$}
+Find nodes $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{wj}^*$ is
 minimum among all sets $S \in \Gamma(u, v)$. If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity}
 induced by $u, v, S^*$ is violated. We solve this separation problem
 once for each cluster and add the violated constraints to the problem.
