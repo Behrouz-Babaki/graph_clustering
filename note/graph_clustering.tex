@@ -140,7 +140,7 @@ We assume that the reader is familiar with basic graph theory. Here we quickly r
 % Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
 
 
-Consider a simple undirected graph $G=(V, E)$ where vertices represent genes, and edges represent interactions between those genes. Our goal is to partition $V$
+Consider a simple undirected graph $G=(V, E)$ where nodes represent genes, and edges represent interactions between those genes. Our goal is to partition $V$
 into $k$ subsets (called \emph{clusters} from now on), such that the
 subgraph induced by each subset is connected. These represent the pathways we seek to identify. Our preference is to avoid
 having clusters that contain only a small number of nodes. To enforce
@@ -148,7 +148,7 @@ this preference, we define one of our goals as maximizing the size of
 the smallest cluster. Moreover, there exists a set of tuples
 $C = \{(u, v, w): u, v \in V, w \in \mathbb{R}^+\}$ which indicates that
 including $u$ and $v$ in the same cluster will induce a penalty of $w$. We denote all edges $(u, v)$ such that $(u, v, w) \in C$ by $E_C$. Our second goal is to minimize the sum of such penalties.
-\NDB{Find a better representation for cl}
+
 
 To include both goals in the objective function, assume that $S$ is the
 size of the smallest cluster and $W$ is the total penalty. We define the
@@ -158,18 +158,18 @@ positive parameter specified by user which determines the relative importance of
 
 We can formulate this problem as an integer linear program. The main
 decision variables in this formulation are those that determine the
-assignment of vertices to the clusters. In our formulation, the binary
-variable $x_{ij}$ indicates whether or not vertex $i$ is included in
-cluster $j$. We know that each vertex is assigned to exactly one
+assignment of nodes to the clusters. In our formulation, the binary
+variable $x_{ij}$ indicates whether or not node $i$ is included in
+cluster $j$. We know that each node is assigned to exactly one
 cluster. This can be enforced by the following set of constraints:
-\NDB{Avoid $|V|$ throughout}
+
 \begin{equation}
 \sum_{j=1}^k x_{ij} = 1 \quad \forall i \in \{1, \ldots, |V|\} \label{cons:assign}\\
 \end{equation}
 
 To include the penalties in the model, we introduce additional
 variables. The binary variable $y_{uvj}$ is equal to one if and only if
-vertices $u$ and $v$ are both included in the $j$th cluster. To enforce
+nodes $u$ and $v$ are both included in the $j$th cluster. To enforce
 this property, we add the following constraints to the model:
 
 \begin{equation}
@@ -245,22 +245,18 @@ Despite the exponential number of constraints, given an objective function it is
 
 Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of the intermediate nodes on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \Leftrightarrow \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
 
-\begin{equation}
+\begin{equation*}
 0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
-\end{equation}
+\end{equation*}
 
-\NDB{connect \ldots}
-
-Let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
+More formally, let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
 \begin{multline}
 0 \leq \sum_{i\in I_r} x_{ij} - |I_r| y_{rj} \leq |I_r| - 1 \\
 \forall j \in \{1, \ldots, k\}, \forall u, v \in V, (u, v) \notin E, \\ \forall r \in \{1, \ldots, |P_{uv}|\}
 \label{cons:path}
 \end{multline}
 
-Finally, we can encode the connectivity condition by adding the following constraints:
-
-\NDB{explain why \ldots}
+Finally, to enforce the condition $(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{r} (y_{rj}=1)$, we add the following constraints to the model:
 
 \begin{multline}
 x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
@@ -271,11 +267,10 @@ x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
 \subsection{A cutting plane approach}
 \label{sec:bnc}
 
- \NDB{Prune and revise}
- We first review the basics of the cutting plane method: First starting with a (possibly empty) subset of the constraints, a violated constraint is added and the problem is solved until there exists no such constraint. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+ In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
 
  
- Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The definition and theorems in this section are also taken from~\cite{CarvajalCGVW13}.
+ Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The following definition and theorem are taken from~\cite{CarvajalCGVW13}.
 
 \begin{definition}[Node-cut set]
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
@@ -297,7 +292,7 @@ Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exist
 \end{theorem}
 
 According to theorem~\ref{theorem:cutset} to ensure that cluster $j$ is connected, the following condition should hold for each $uv$-node cut $S$:
-\NDB{Define $x_{wj}$}
+
 \begin{equation*}
 (x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
 \end{equation*}
@@ -310,27 +305,19 @@ By translating this condition into linear constraints we can formulate the const
 \label{eq:connectivity}
 \end{multline}
 
-\NDBi{Revised up to here}
-This formulation adds an exponential number of constraints to the problem. Luckily, for the connectivity constraints, the separation problem can be
-solved efficiently. Given a solution of the problem, the
-separation problem for cluster $j$ can be stated as an optimization subproblem: Let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$. \NDB{Define $\mathbf{x}^*$ and $\mathbf{x}_j^*$}
-Find nodes $u$ and $v$ such that $(u, v) \notin E$ and a set $S^* \in \Gamma(u, v)$ such that the sum $\sum_{w \in S^*} x_{wj}^*$ is
-minimum among all sets $S \in \Gamma(u, v)$. If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity}
-induced by $u, v, S^*$ is violated. We solve this separation problem
-once for each cluster and add the violated constraints to the problem.
-If no such violated constraint is found, then the solution is optimal.
+The constraint set~\ref{eq:connectivity} contains an exponential number of constraints. Following the cutting plane method, we will iteratively add some of the violated constraints to the model. A common practice is to add one or some of the \emph{most violated} constraints in each iteration. Suppose that we want to add the most violated constraint in each cluster. We do so by evaluating the maximum degree of violation induced by each pair of non-adjacent nodes in each cluster. 
 
-The question is now how to find $S^*$, the minimum node cut separating
-$u$ and $v$. We use the following theorem to solve this problem:
+Given a solution $\mathbf{x}^*$ of the problem, let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$ and the vector of variables corresponding to cluster $j$ by $\mathbf{x}^*_j$.If $\mathbf{x}^*$ is an integer solution, a constraint in~\ref{eq:connectivity} is violated if and only if $\sum_{w \in S} x^*_{wj} = 0$. However for non-integer solutions there could be different degrees of violation. To find the most violated constraint in cluster $j$ we need to find the following set for each non-adjacent pair $(u, v)$:
+\begin{equation}
+S^* =\underset{S \in \Gamma(u, v)}{\mathrm{argmin}} \sum_{w \in S} x^*_{wj}
+\label{eq:separation}
+\end{equation}
 
-\begin{theorem}
-Given a graph with node capacities, the maximum flow between
-two non-adjacent nodes $u$ and $v$ equals the capacity of the minimum
-capacity node cut separating $u$ and $v$.
-\end{theorem}
+If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity} induced by $u, v, S^*$ is violated. If no such violated constraint is found, then the solution is optimal.
 
-To solve the separation problem, we solve a max-flow problem for each
-pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat this $k$ times, once for every cluster. This procedure is summarized in algorithm~\ref{alg:cut}.
+
+ 
+It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:separation} can be computed efficiently: If we assign $x^*_{ij}$ as the capacity of node $i$, the separation problem reduces to finding the minimum capacity node cut separating $u$ and $v$. This problem can be solved using any standard \emph{min-cut} algorithm. A summary of the cut generation procedure is presented in algorithm~\ref{alg:cut}. 
 
 \begin{algorithm}
 \centering
@@ -339,12 +326,17 @@ pair of non-adjacent nodes using values $x^*_{ij}$ as node capacities. We repeat
 \begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$
 \For{$j \in \{1, \ldots, k\}$}
+	\State $\delta \gets 0$
+	\State $\mathcal{C}_j \gets \emptyset$	
 	\For{$u, v$ such that $(u, v) \notin E$ and $x_{uj}^* + x_{vj}^* > 1$}
 		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_j)$ 
-		\If{$\sum_{w \in S^*} x_{wj}^* < x_{uj}^* + x_{vj}^* - 1$}
-			\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$
+		\State $\Delta \gets x_{uj}^* + x_{vj}^* - 1 - \sum_{w \in S^*} x_{wj}^*$
+		\If{$\Delta > \delta$ }\Comment{maximum violation}
+			\State $\mathcal{C}_j \gets \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$
+			\State $\delta \gets \Delta$			
 		\EndIf
 	\EndFor
+	\State $\mathcal{C} \gets \mathcal{C} \cup \mathcal{C}_j$
 \EndFor
 \State Add constraints $\mathcal{C}$ to the model
 \end{algorithmic}
@@ -365,17 +357,17 @@ In this section we will evaluate the suitability of our algorithms to address th
 
 \subsection{Experiment setting}
 We ran the experiments on Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the python interface
-of \emph{Gurobi-6.5}\footnote{www.gurobi.com}. To solve the separation problem, we used the implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. 
+of \emph{Gurobi-7}\footnote{www.gurobi.com}. To solve the separation problem, we used the implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. 
 
 To use this implementation for our problem, we replaced
 each undirected edge by two opposite directed edges. The capacity of
-these edges is infinite. Then we replaced each vertex $v$ by two
-vertices $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
+these edges is infinite. Then we replaced each node $v$ by two
+nodes $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
 edges, with capacities equal to the capacity of $v$. We obtain the
 minimum node cut separating $u$ and $v$ by computing the minimum cut
 between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 
-We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: We added cuts to the
+We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: We added the most violated constraint for \emph{all} non-adjacent pairs of nodes. We added cuts to the
 linear relaxation only at the root node of the branch-and-cut tree.
 Moreover, when adding cuts to the relaxation, we monitored the change in
 the value of objective function, and stopped adding the cuts if this
