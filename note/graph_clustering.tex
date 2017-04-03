@@ -404,20 +404,16 @@ The code and the data will be made available upon publication of this paper.
 \subsubsection{Scalability of the two approaches}
 We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.5,1,2,3,4,5,10\}$ values\NDT{Dries/Behrouz: check $\gamma$ values, guessed by Tias}. Table~\ref{table:runtime} shows the results. As can be seen... \NDT{to complete}
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.4]{images/gamma_smallest_cluster_size}
-\captionsetup{font=small}
-\caption{TODO for instance \emph{250\_750}}
-\label{fig:gamma_cluster}
-\end{figure}
+\subsubsection{Impact of $\gamma$}
+The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty.
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.4]{images/gamma_total_penalty_incurred}
+\includegraphics[scale=0.25]{images/gamma_smallest_cluster_size}
+\includegraphics[scale=0.25]{images/gamma_total_penalty_incurred}
 \captionsetup{font=small}
-\caption{TODO We have no consistency in the line plots style :'( for instance \emph{250\_750}}
-\label{fig:gamma_penalty}
+\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \emph{250\_750}}
+\label{fig:gamma}
 \end{figure}
 
 \begin{figure}
