@@ -213,6 +213,25 @@ These constraints do not eliminate all symmetries (especially in the case of ove
 
 \NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
 
+\subsection{Obtaining the set of Pareto optimal solutions}
+An alternative to setting a trade-off between the two conflicting objectives is to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. To obtain the Pareto optimal solution, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143}. We remove the size of the smallest cluster from the objective and bound it by a hard constraint. Then we iteratively solve this modified problem, each time using a bound that is one higher than the size of the smallest cluster in the previous solution (see algorithm~\ref{alg:pareto}).
+
+\begin{algorithm}
+\centering
+\caption{Computing the set of Pareto optimal solutions}
+\label{alg:pareto}
+\begin{algorithmic}[1]
+\State $\mathcal{P} \gets \emptyset$ \Comment{the set of Pareto optimal solutions}
+\State $min\_size \gets 0$
+\Repeat
+	\State $solution \gets \textsc{MinimizePenalties}(G, W, min\_size)$
+	\State $\mathcal{P} \gets \mathcal{P} \cup solution$
+	\State $s \gets$ size of the smallest cluster in $solution$
+	\State $min\_size \gets s+1$
+\Until{no $solution$ was found}
+\end{algorithmic}
+\end{algorithm}
+
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
@@ -321,6 +340,9 @@ It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:sepa
 \State Add constraints $\mathcal{C}$ to the model
 \end{algorithmic}
 \end{algorithm}
+
+
+
 
 
 \section{Experiments}
