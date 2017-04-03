@@ -192,6 +192,9 @@ below:
 & s \in \{0, \ldots, \lfloor \frac{|V|}{k} \rfloor \}                                  
 \end{align}
 
+\section{Extensions and improvements}
+\NDBi{We can collect the following into a new section}
+
 \subsection{Overlapping clusters}
 Sometimes we can allow a node to be included in more than one cluster. For example, in our motivating application it is the case that a gene can serve as an essential part of different pathways. 
 
@@ -211,10 +214,8 @@ Clustering problems often have an inherent symmetry which is due to the fact tha
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
-\NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
-
 \subsection{Obtaining the set of Pareto optimal solutions}
-An alternative to setting a trade-off between the two conflicting objectives is to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. To obtain the Pareto optimal solution, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143}. We remove the size of the smallest cluster from the objective and bound it by a hard constraint. Then we iteratively solve this modified problem, each time using a bound that is one higher than the size of the smallest cluster in the previous solution (see algorithm~\ref{alg:pareto}).
+An alternative to setting a trade-off between the two conflicting objectives is to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. To obtain the Pareto optimal solutions, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143}. We remove the size of the smallest cluster from the objective and bound it by a hard constraint. Then we iteratively solve this modified problem, each time using a bound that is one higher than the size of the smallest cluster in the previous solution (algorithm~\ref{alg:pareto}).
 
 \begin{algorithm}
 \centering
@@ -232,6 +233,7 @@ An alternative to setting a trade-off between the two conflicting objectives is 
 \end{algorithmic}
 \end{algorithm}
 
+\NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
