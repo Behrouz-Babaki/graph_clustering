@@ -230,7 +230,7 @@ In the above formulation we used the commonly employed method of reducing a bi-o
 \begin{align}
 \sum_{i=1}^{|V|} x_{ic} > m \quad \forall c \in \{1, \ldots, k\}
 \end{align}
-The general approach is depicted in Algorithm~\ref{alg:pareto}.
+The approach is depicted in Algorithm~\ref{alg:pareto}.
 
 \begin{algorithm}[t]
 \centering
@@ -252,38 +252,44 @@ The general approach is depicted in Algorithm~\ref{alg:pareto}.
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
-In this section we give a concrete definition of the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$. For a cluster to be connected, for each pair of points belonging to the cluster there should exist at least one path between these two nodes such that all nodes on this path also belong to this cluster. In section~\ref{sec:enumerate} we enforce this condition by explicitly enumerating all simple paths between each pair of non-adjacent nodes in the graph and adding variables and constraints for these paths. However, the exponential number of added constraints and variables limits the scalability of this method.
+The remaining issue to work out is how to represent the $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ constraint. We investigate two different approaches.
 
-Despite the exponential number of constraints, given an objective function it is likely that only a manageable subset of these constraints are active at the optimal solution. The \emph{cutting plane} algorithm is a method that tries to approximate this subset incrementally. In section~\ref{sec:bnc} we introduce another formulation for the connectivity constraint which again amounts to an exponential number of linear constraints, but lends itself better to the requirements of the cutting plane method.
+For a cluster to be connected, there should exist for each pair of points belonging to the cluster at least one path between these two nodes such that all nodes on this path also belong to the cluster. In section~\ref{sec:enumerate} we enforce this condition by explicitly enumerating all simple paths between each pair of non-adjacent nodes in the graph and adding variables and constraints for these paths. However, the total number of paths can be exponential leading to very large models to solve.
+
+A way to avoid having to ground out constraints for all the possible paths is to incrementally add only those constraints needed. The \emph{cutting plane} algorithm is a method that allows this exactly. In section~\ref{sec:bnc} we introduce another formulation for the connectivity constraint based on node-cut sets, which also has a worst-case exponential number of constraints but which lends itself well to an incremental cutting plane method.
 
 \subsection{Enumerating all simple paths}
 \label{sec:enumerate}
 
-Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of the intermediate nodes on this path. Assume that binary variable $y$ indicates that all these nodes belong to cluster $j$. A standard translation of the relation $(y=1) \Leftrightarrow \land_{i \in I} (x_{ij}=1)$ to linear constraints gives the following inequality:
-
+Consider a simple path between the nodes $u$ and $v$. Let $I$ denote the set of indices of the intermediate nodes on this path. Assume that binary variable $y_c$ indicates that all these nodes belong to cluster $c$. A standard translation of the relation $(y_c=1) \Leftrightarrow \land_{i \in I} (x_{ic}=1)$ to linear constraints gives the following inequality:
+%
 \begin{equation*}
-0 \leq \sum_{i \in I} x_{ij} - |I|y \leq |I|-1
+0 \leq \sum_{i \in I} x_{ic} - |I|y_c \leq |I|-1
 \end{equation*}
 
-More formally, let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rj}$ to indicate that all these nodes are assigned to cluster $j$. This relationship is enforced by the following constraints:
+In general, let $P_{uv}$ denote the set of all simple paths between nodes $u$ and $v$ in the interaction graph. For a path $P_r \in P_{uv}$, let $I_r$ denote the set of indices of intermediate nodes of $P_r$. We introduce binary variable $y_{rc}$ to indicate that all these nodes are assigned to cluster $c$. This relationship is enforced by the following constraints:
 \begin{multline}
-0 \leq \sum_{i\in I_r} x_{ij} - |I_r| y_{rj} \leq |I_r| - 1 \\
-\forall j \in \{1, \ldots, k\}, \forall u, v \in V, (u, v) \notin E, \\ \forall r \in \{1, \ldots, |P_{uv}|\}
+0 \leq \sum_{i\in I_r} x_{ic} - |I_r| y_{rc} \leq |I_r| - 1 \qquad \forall u, v \in V, (u, v) \notin E, \\
+\forall r \in \{1, \ldots, |P_{uv}|\}, \forall c \in \{1, \ldots, k\}
 \label{cons:path}
 \end{multline}
+%  -- implicit: |I_r| will be 0 in that case.
 
-Finally, to enforce the condition $(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{r} (y_{rj}=1)$, we add the following constraints to the model:
-
+Finally, to enforce the condition $(x_{uc}=1 \land x_{vc}=1) \Rightarrow \lor_{r} (y_{rc}=1)$, we add the following constraints to the model:
+%
 \begin{multline}
-x_{uj} + x_{vj} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rj} \\
-\forall u, v \in V, (u, v) \notin E, \forall j \in \{1, \ldots, k\}
+x_{uc} + x_{vc} -1 \leq \sum_{r=1}^{|P_{uv}|} y_{rc} \qquad
+\forall u, v \in V, (u, v) \notin E, \\ \forall c \in \{1, \ldots, k\}
 \label{cons:pconnect}
-\end{multline}
+\end{multline} 
+
+These constraints ensure there exists at least one path in the interaction graph between every two nodes in the same cluster.
 
 \subsection{A cutting plane approach}
 \label{sec:bnc}
 
- In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given a vector $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem. In a ~\emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+ In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution, a cut, is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given an assignment $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem.
+ In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. \NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
 
  
  Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The following definition and theorem are taken from~\cite{CarvajalCGVW13}.
@@ -307,33 +313,33 @@ Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exist
 \label{theorem:cutset}
 \end{theorem}
 
-According to theorem~\ref{theorem:cutset} to ensure that cluster $j$ is connected, the following condition should hold for each $uv$-node cut $S$:
+According to theorem~\ref{theorem:cutset} to ensure that cluster $c$ is connected, the following condition should hold for each $uv$-node cut $S$:
 
 \begin{equation*}
-(x_{uj}=1 \land x_{vj}=1) \Rightarrow \lor_{w \in S} (x_{wj}=1)
+(x_{uc}=1 \land x_{vc}=1) \Rightarrow \lor_{w \in S} (x_{wc}=1)
 \end{equation*}
 
-By translating this condition into linear constraints we can formulate the constraint $\mathsf{connected}(x_{1j}, \ldots, x_{|V|j})$ as follows:
+By translating this condition into linear constraints we can formulate the constraint $\mathsf{connected}(x_{1c}, \ldots, x_{|V|c})$ as follows:
 
 \begin{multline}
-\sum_{w \in S} x_{wj} \geq x_{uj} + x_{vj} - 1 \\
+\sum_{w \in S} x_{wc} \geq x_{uc} + x_{vc} - 1 \\
 \forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
 \label{eq:connectivity}
 \end{multline}
 
 The constraint set~\ref{eq:connectivity} contains an exponential number of constraints. Following the cutting plane method, we will iteratively add some of the violated constraints to the model. A common practice is to add one or some of the \emph{most violated} constraints in each iteration. Suppose that we want to add the most violated constraint in each cluster. We do so by evaluating the maximum degree of violation induced by each pair of non-adjacent nodes in each cluster. 
 
-Given a solution $\mathbf{x}^*$ of the problem, let us denote the value of $x_{ij}$ variables in this solution by $x^*_{ij}$ and the vector of variables corresponding to cluster $j$ by $\mathbf{x}^*_j$.If $\mathbf{x}^*$ is an integer solution, a constraint in~\ref{eq:connectivity} is violated if and only if $\sum_{w \in S} x^*_{wj} = 0$. However for non-integer solutions there could be different degrees of violation. To find the most violated constraint in cluster $j$ we need to find the following set for each non-adjacent pair $(u, v)$:
+Given a solution $\mathbf{x}^*$ of the problem, let us denote the value of $x_{ic}$ variables in this solution by $x^*_{ic}$ and the vector of variables corresponding to cluster $c$ by $\mathbf{x}^*_c$.If $\mathbf{x}^*$ is an integer solution, a constraint in~\ref{eq:connectivity} is violated if and only if $\sum_{w \in S} x^*_{wc} = 0$. However for non-integer solutions there could be different degrees of violation. To find the most violated constraint in cluster $c$ we need to find the following set for each non-adjacent pair $(u, v)$:
 \begin{equation}
-S^* =\underset{S \in \Gamma(u, v)}{\mathrm{argmin}} \sum_{w \in S} x^*_{wj}
+S^* =\underset{S \in \Gamma(u, v)}{\mathrm{argmin}} \sum_{w \in S} x^*_{wc}
 \label{eq:separation}
 \end{equation}
 
-If $\sum_{w \in S^*} x_{wj}^* < x^*_{uj} + x^*_{vj} - 1$ then the equality~\ref{eq:connectivity} induced by $u, v, S^*$ is violated. If no such violated constraint is found, then the solution is optimal.
+If $\sum_{w \in S^*} x_{wc}^* < x^*_{uc} + x^*_{vc} - 1$ then the equality~\ref{eq:connectivity} induced by $u, v, S^*$ is violated. If no such violated constraint is found, then the solution is optimal.
 
 
  
-It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:separation} can be computed efficiently: If we assign $x^*_{ij}$ as the capacity of node $i$, the separation problem reduces to finding the minimum capacity node cut separating $u$ and $v$. This problem can be solved using any standard \emph{min-cut} algorithm. A summary of the cut generation procedure is presented in algorithm~\ref{alg:cut}. 
+It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:separation} can be computed efficiently: If we assign $x^*_{ic}$ as the capacity of node $i$, the separation problem reduces to finding the minimum capacity node cut separating $u$ and $v$. This problem can be solved using any standard \emph{min-cut} algorithm. A summary of the cut generation procedure is presented in algorithm~\ref{alg:cut}. 
 
 \begin{algorithm}
 \centering
@@ -341,18 +347,18 @@ It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:sepa
 \label{alg:cut}
 \begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$
-\For{$j \in \{1, \ldots, k\}$}
+\For{$c \in \{1, \ldots, k\}$}
 	\State $\delta \gets 0$
-	\State $\mathcal{C}_j \gets \emptyset$	
-	\For{$u, v$ such that $(u, v) \notin E$ and $x_{uj}^* + x_{vj}^* > 1$}
-		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_j)$ 
-		\State $\Delta \gets x_{uj}^* + x_{vj}^* - 1 - \sum_{w \in S^*} x_{wj}^*$
+	\State $\mathcal{C}_c \gets \emptyset$	
+	\For{$u, v$ such that $(u, v) \notin E$ and $x_{uc}^* + x_{vc}^* > 1$}
+		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_c)$ 
+		\State $\Delta \gets x_{uc}^* + x_{vc}^* - 1 - \sum_{w \in S^*} x_{wc}^*$
 		\If{$\Delta > \delta$ }\Comment{maximum violation}
-			\State $\mathcal{C}_j \gets \{\sum_{w \in S^*} x_{wj} \geq x_{uj} + x_{vj} - 1\}$
+			\State $\mathcal{C}_c \gets \{\sum_{w \in S^*} x_{wc} \geq x_{uc} + x_{vc} - 1\}$
 			\State $\delta \gets \Delta$			
 		\EndIf
 	\EndFor
-	\State $\mathcal{C} \gets \mathcal{C} \cup \mathcal{C}_j$
+	\State $\mathcal{C} \gets \mathcal{C} \cup \mathcal{C}_c$
 \EndFor
 \State Add constraints $\mathcal{C}$ to the model
 \end{algorithmic}
