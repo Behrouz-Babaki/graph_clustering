@@ -432,7 +432,7 @@ As explained in Section~\ref{sec:pareto} one can also use generic solvers to com
 \begin{table}
 \centering
 \captionsetup{font=small}
-\captionof{table}{Average runtimes of overlapping and non-overlapping clustering by enumerating all simple paths (ENUM) and branch and cut (BnC). Experiments were terminated after 1800 seconds (--).}
+\captionof{table}{Average runtimes of overlapping and non-overlapping clustering by enumerating all simple paths (ENUM) and branch and cut (BnC). The runtime for timed-out experiments is counted as 600 seconds (--).}
 \label{table:runtime}
 
 \begin{tabular}{|ll|rr|rr|}
@@ -440,38 +440,38 @@ As explained in Section~\ref{sec:pareto} one can also use generic solvers to com
 		 &   &  \multicolumn{2}{|c|}{\emph{overlapping}} & \multicolumn{2}{|c|}{\emph{non-overlapping}} \\
          \cline{3-6}
 \emph{instance} & \emph{k} &  \textbf{ENUM} &  \textbf{BnC} &  \textbf{ENUM} &  \textbf{BnC} \\
-\hline         
-200\_1000 & 2 &     741 &    11.9 &       0.32 &    13.4 \\
-         & 3 &     743 &    18.2 &       4.47 &    15.0 \\
-         & 4 &     749 &    29.1 &      15.58 &    52.3 \\
-\hdashline[.4pt/1pt]         
-200\_1250 & 2 &     269 &    45.2 &     121 &    38.4 \\
-         & 3 &    1482 &    54.1 &     367 &    65.2 \\
-         & 4 &        -- &   167.4 &    1651 &   204.1 \\
-\hdashline[.4pt/1pt]         
-250\_1000 & 2 &    1278 &    75.9 &     603 &    64.5 \\
-         & 3 &    1722 &   114.8 &    1661 &   204.1 \\
-         & 4 &        -- &   200.9 &         --  &       --  \\
-\hdashline[.4pt/1pt]         
-250\_750 & 2 &       0.16 &     4.06 &       0.02 &     4.01 \\
-         & 3 &       0.31 &     6.87 &       0.40 &     4.24 \\
-         & 4 &       0.70 &    10.70 &       0.64 &     7.85 \\
-\hdashline[.4pt/1pt]         
-300\_750 & 2 &     741 &    12.6 &     741 &    10.31 \\
-         & 3 &     741 &    19.6 &     742 &    18.37 \\
-         & 4 &     742 &    29.5 &     743 &    53.47 \\
-\hdashline[.4pt/1pt]         
-350\_500 & 2 &     741 &     0.10 &       0.01 &     0.15 \\
-         & 3 &     741 &     0.14 &       0.02 &     0.25 \\
-         & 4 &     741 &     0.18 &       0.04 &     0.21 \\
-\hdashline[.4pt/1pt]         
-350\_750 & 2 &       0.46 &    43.1 &       0.54 &    19.8 \\
-         & 3 &       1.88 &    95.0 &       2.04 &    57.2 \\
-         & 4 &       7.21 &   656.8 &       9.25 &   476.3 \\
-\hdashline[.4pt/1pt]         
-450\_750 & 2 &     742 &   120 &     742.0 &    92.8 \\
-         & 3 &     747 &   569 &     425.1 &   408.5 \\
-         & 4 &     660 &   836 &      75.4 &      -- \\
+\hline      
+200\_1000 & 2 &     247.547 &    11.897 &       0.319 &    13.398 \\
+         & 3 &     248.948 &    18.182 &       4.474 &    15.007 \\
+         & 4 &     255.792 &    29.101 &      15.578 &    52.262 \\
+\hdashline[.4pt/1pt]                              
+200\_1250 & 2 &     269.871 &    45.216 &     121.712 &    38.363 \\
+         & 3 &     564.570 &    54.101 &     300.823 &    65.178 \\
+         & 4 &         --  &   167.424 &     592.178 &   204.146 \\
+\hdashline[.4pt/1pt]                              
+250\_1000 & 2 &     502.380 &    75.920 &     320.640 &    64.508 \\
+         & 3 &     592.765 &   114.766 &     --       &   204.145 \\
+         & 4 &         --  &   200.899 &         --   &       --   \\
+\hdashline[.4pt/1pt]                              
+250\_750 & 2 &       0.155 &     4.061 &       0.022 &     4.006 \\
+         & 3 &       0.313 &     6.866 &       0.402 &     4.242 \\
+         & 4 &       --    &    10.698 &       0.642 &     7.848 \\
+\hdashline[.4pt/1pt]                              
+300\_750 & 2 &     247.255 &    12.602 &     247.182 &    10.314 \\
+         & 3 &     247.507 &    19.561 &     247.536 &    18.370 \\
+         & 4 &     248.075 &    29.513 &     249.175 &    53.465 \\
+\hdashline[.4pt/1pt]                              
+350\_500 & 2 &     247.061 &     0.095 &       0.003 &     0.151 \\
+         & 3 &     247.062 &     0.142 &       0.021 &     0.257 \\
+         & 4 &     247.063 &     0.181 &       0.039 &     0.211 \\
+\hdashline[.4pt/1pt]                              
+350\_750 & 2 &       0.459 &    43.051 &       0.538 &    19.780 \\
+         & 3 &       1.875 &    95.039 &       2.036 &    57.167 \\
+         & 4 &       7.210 &   303.829 &       9.253 &   335.162 \\
+\hdashline[.4pt/1pt]                              
+450\_750 & 2 &     247.977 &   120.781 &     247.843 &    92.776 \\
+         & 3 &     253.345 &   286.763 &     148.196 &   316.153 \\
+         & 4 &     260.344 &   356.816 &      75.395 &       --  \\
 \hline
 \end{tabular}
 \end{table}
