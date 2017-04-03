@@ -6,7 +6,6 @@
 \usepackage{caption}
 \usepackage{cite}
 \usepackage{sidecap}
-\usepackage{lipsum}
 
 \usepackage[dvipsnames]{xcolor}
 \colorlet{lhue}{SpringGreen}
@@ -417,6 +416,51 @@ The code and the data will be made available upon publication of this paper.
 \label{fig:pareto}
 \end{figure}
 
+\begin{table}
+\centering
+\captionsetup{font=small}
+\captionof{table}{Average runtimes of overlapping and non-overlapping clustering by enumerating all simple paths (ENUM) and branch and cut (BnC). The runtime for timed-out experiments is counted as 1800.}
+\begin{tabular}{|ll|rr|rr|}
+\hline
+		 &   &  \multicolumn{2}{|c|}{overlapping} & \multicolumn{2}{|c|}{non-overlapping} \\
+         &   & \cline{1-4}		 
+         &   &  ENUM &  BnC &  ENUM &  BnC \\
+instance & k &             &           &             &           \\
+\hline
+200\_1000 & 2 &     467.092 &    12.453 &     467.092 &    12.453 \\
+         & 3 &     469.513 &    17.006 &     469.513 &    17.006 \\
+         & 4 &     477.935 &    37.679 &     477.935 &    37.679 \\
+\hline         
+200\_1250 & 2 &     195.791 &    41.790 &     195.791 &    41.790 \\
+         & 3 &     908.929 &    59.797 &     908.929 &    59.797 \\
+         & 4 &    1725.501 &   185.785 &    1725.501 &   185.785 \\
+\hline         
+250\_1000 & 2 &     940.922 &    70.214 &     940.922 &    70.214 \\
+         & 3 &    1691.626 &   159.455 &    1691.626 &   159.455 \\
+         & 4 &    1800.000 &   200.899 &    1800.000 &   200.899 \\
+\hline         
+250\_750 & 2 &       0.089 &     4.033 &       0.089 &     4.033 \\
+         & 3 &       0.357 &     5.554 &       0.357 &     5.554 \\
+         & 4 &       0.669 &     9.273 &       0.669 &     9.273 \\
+\hline         
+300\_750 & 2 &     741.336 &    11.458 &     741.336 &    11.458 \\
+         & 3 &     741.639 &    18.966 &     741.639 &    18.966 \\
+         & 4 &     742.743 &    41.489 &     742.743 &    41.489 \\
+\hline         
+350\_500 & 2 &     466.669 &     0.116 &     466.669 &     0.116 \\
+         & 3 &     466.677 &     0.185 &     466.677 &     0.185 \\
+         & 4 &     466.684 &     0.192 &     466.684 &     0.192 \\
+\hline         
+350\_750 & 2 &       0.499 &    31.416 &       0.499 &    31.416 \\
+         & 3 &       1.955 &    76.103 &       1.955 &    76.103 \\
+         & 4 &       8.231 &   566.554 &       8.231 &   566.554 \\
+\hline         
+450\_750 & 2 &     742.028 &   106.779 &     742.028 &   106.779 \\
+         & 3 &     607.781 &   499.499 &     607.781 &   499.499 \\
+         & 4 &     426.364 &  1222.089 &     426.364 &  1222.089 \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsubsection{Biological validation}
 
