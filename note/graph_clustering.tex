@@ -36,64 +36,41 @@ KU Leuven, Belgium}
 KU Leuven, Belgium}
 \and
 \IEEEauthorblockN{Tias Guns}
-\IEEEauthorblockA{Dept. Business technology \\and Operations\\
-VUB, Belgium}}
+\IEEEauthorblockA{Dept. Computer Science, KU Leuven, Belgium \\ \&
+Dept. Business technology and Operations, \\VUB, Belgium}}
 
 \maketitle
 
 \begin{abstract}
-Clustering is a well-defined problem in data mining, and many variations exists. However, in practice practitioners often have additional constraints or quality scores that are not supported by standard algorithms. This has lead to the study of constrained clustering, which investigates generic methods to handle a variety of constraints and objectives. In our bioinformatics work, we were faced with exactly such a problem: a graph clustering problem with strict connectivity requirements and an objective function based on penalties rather than density of the clustering. In this paper, we explain the problem including the constraints and quality measures, and propose to use generic Mixed Integer Programming to solve it. We propose two approaches to handle the connectivity requirement in particular: one defined over all simple paths in the graph explicitly, and one based on cutting planes that enforce connectivity only if needed. Our experiments show that these approaches are able to solve the problem satisfactory. We hence demonstrate the applicability of generic OR methods on this application-driven data mining problem.
+Clustering is a well-defined problem class in data mining, and many variations of it exists. However, practitioners often have additional constraints or quality scores that are not supported by standard algorithms. This has lead to the study of constrained clustering, which investigates generic methods to handle a variety of constraints and objectives. In our bioinformatics work, we were faced with exactly such a problem: a graph clustering problem with strict connectivity requirements and an objective function based on penalties rather than density of the clustering. In this paper, we explain the problem including the constraints and quality measures, and propose to use generic Mixed Integer Programming to solve it. We propose two approaches to handle the connectivity requirement in particular: one defined over all simple paths in the graph explicitly, and one based on cutting planes that enforce connectivity only if needed. Our experiments show that these approaches are able to solve the problem well. We hence demonstrate the applicability of generic OR methods on this application-driven data mining problem.
 \end{abstract}
 
 \section{Introduction}
 \label{introduction}
 
+% graph clustering (and partitioning)
 Clustering is the task of partitioning a set of instances into
-homogeneous subsets. Most clustering algorithms only take the features
-of individual instances as input. However, it is also possible to
-encode the relationships between instances as a graph and include this
-information in the clustering task. When the instances form the nodes
-of a graph, the clustering task is also called \emph{graph
-  partitioning}. Given the abundance of relational data in social
-network analysis and bioinformatics, it is not a surprise to see
-numerous applications of graph partitioning in these fields. However,
-graph partitioning has also applications in route planning, image
-processing, VLSI design, and parallel processing~\cite{BulucMSS016}.
+homogeneous subsets. The quality of the clustering is typically determined by the \textit{distance} between the instances. In graph clustering~\cite{schaeffer2007graph}, each instance is assumed to a node in a graph; this graph is typically not fully connected. The quality is then determined by the \textit{density} of the instances within a cluster or by the \textit{cut size} between the clusters, that is the number of edges shared between different clusters. The latter is for example frequently studied in the field of graph partitioning~\cite{BulucMSS016}. Graph clustering has applications in many domains including social network analysis and community detection, information networks, transportation and logistics, and bioinformatics~\cite{schaeffer2007graph}.
 
-Motivated by an application in the analysis of biological networks, we
-introduce the following graph partitioning problem: Given a Graph
-and a positive integer $k$, partition the graph into $k$
-connected components. We also assume that there are a set of penalties
-for co-membership of certain pairs of nodes in the same cluster. We
-desire two properties for the output partitioning: First, we want to
-avoid obtaining components that are too small. Second, the total
-weight of penalties should be as small as possible.
+% constrained clustering
+As data mining is increasingly applied on more and more problems in different domains, it increasingly happens that existing clustering methods are not suited for the problem at hand. This is either because the problem domain imposes additional constraints that can not be expressed in these methods, or because the objective function has a non-standard form. This has lead to the field of \textit{constrained clustering}, which studies clustering problems involving different constraints and objectives~\cite{basu2008constrained}. An increasingly popular way to handle a broad range of constraints and objectives is to use generic optimisation tools. In other words, to cast the problem as an optimisation problem and to use generic (discrete) optimisation solvers such as constraint programming~\cite{DaoDV13}, mixed integer programming~\cite{DBLP:conf/aaai/GilpinND13,DBLP:conf/cpaior/BabakiGN14} or maximum satisfiability solvers~\cite{DBLP:journals/ai/BergJ17}. Though scalability can be an issue, these solvers can intrinsically handle different objectives and constraints.
 
-We formulate this problem as mixed integer programming (MIP)
-problem. Recently, there has been an interest in such
-approaches from the \emph{declarative data mining}
-perspective~\cite{DaoDV13}. This perspective encourages formulating
-data mining problems as models in constraint satisfaction/optimization
-frameworks (e.g. constraint programming and integer programming). One
-of the motivations for doing so is that existing algorithms can be
-extended to new problems by modification of addition of constraints.
+% bio problem (interaction & co-occurence + size)
+The problem we study in this paper is such a graph clustering problem that does not fit existing approaches. It is part of a bigger pipeline in computational cancer research, where the goal is to find \textit{pathways} in gene interaction networks. There is hence an \textit{interaction network} and it is a hard constraint that all nodes belonging to a cluster must be connected in this interaction network. To evaluate the quality there is a separate weighted \textit{co-occurence} network and the nodes belonging to a cluster should have a low co-occurence penalty. Furthermore, small pathways are biologically less meaningful and hence the size of the clusters should also be maximized. The problem is hence a bi-objective graph clustering problem with hard connectivity constraints on a separate network. Existing methods are not able to handle such a complex setting, hence we study a mixed integer programming approach.
+%This perspective encourages formulating
+%data mining problems as models in constraint satisfaction/optimization
+%frameworks (e.g. constraint programming and integer programming). One
+%of the motivations for doing so is that existing algorithms can be
+%extended to new problems by modification of addition of constraints.
 
-We have two contributions in this paper:
-\begin{itemize}
-\item We identify a new graph partitioning problem with applications in analysis of biological networks, and present a MIP formulation for solving it. 
-\item We present a branch-and-cut algorithm to improve the performance and scalability of our method. 
-\end{itemize}
+% contributions
+More specifically, are contributions are as follows: 1) we identify a new bi-objective constrained graph clustering with applications in bio-informatics and present a MIP formulation of the problem; 2) to better handle the large number of connectivity constraints, we propose a branch-and-cut approach that adds connectivity constraints as needed using the principle of node-cut sets. Our experiments demonstrate the effectiveness of the approach.
 
 The rest of this paper is structured as follows:  In
 section~\ref{sec:motivation} we present the application that motivates
-this problem.  In section~\ref{sec:definition} we introduce the formal
-definition of the problem and present the sketch of a MIP formulation.
-In section~\ref{sec:connectivity} we introduce two formulations for
-the connectivity constraints. Both these formulation involve an
-exponential number of constraints. We then present a method for
-including only a sufficient subset of these constraints to the
-model. Section~\ref{sec:experiments} contains some experiments and
-discussions. We review the related literature in section~\ref{sec:related}, and conclude the paper in section~\ref{sec:conclusion} with conclusions and suggestions for future work.
+this problem.  Section~\ref{sec:definition} introduces the formal
+problem definition and a MIP formulation with the connectivity requirement.
+In section~\ref{sec:connectivity} we introduce two methods for handling the connectivity requirement, including a cutting plane approach. Section~\ref{sec:experiments} contains the experiments, followed by related work in section~\ref{sec:related} after which we conclude.
 
 
 \section{Motivating application}
