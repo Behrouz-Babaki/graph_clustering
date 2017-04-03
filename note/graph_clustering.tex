@@ -149,7 +149,7 @@ We can formulate this problem as an integer linear program. The main
 decision variables in this formulation are those that determine the
 assignment of nodes to the clusters. We will use binary variables $x_{ic}$ indicates whether or not node $i$ is included in
 cluster $c$. Each cluster must be assigned to exactly one cluster. This can be enforced by the following set of constraints:
-
+%
 \begin{equation}
 \sum_{c=1}^k x_{ic} = 1 \quad \forall i \in \{1, \ldots, |V|\} \label{cons:assign}\\
 \end{equation}
@@ -158,7 +158,7 @@ To model the first component of the objective in Eq.~\ref{eq:def} we introduce a
 of the smallest cluster. The domain of $s$ is
 $\{0, \ldots, \lfloor \frac{|V|}{k} \rfloor \}$. The following constraints
 ensure that $s$ is smaller or equal than the size of each cluster.
-
+%
 \begin{align}
 s \leq \sum_{i=1}^{|V|} x_{ic} \quad \forall c \in \{1, \ldots, k\}
 \end{align}
@@ -168,7 +168,6 @@ As $s$ is included in the objective function it will be maximized and hence take
 For the second component, we introduce additional variables to model the edges in the induced subgraph $G_o[V_c]$ of each cluster. More specifically, we introduce binary variables $y_{ijc}$ which are equal to one if and only if
 nodes $i$ and $j$ are both included in cluster $V_c$. To enforce
 this property, we add the following constraints to the model:
-
 \begin{equation}
 y_{ijc} \geq x_{ic} + x_{jc} -1 \quad \forall c \in \{1, \ldots, k\}, \forall (i,j) \in E_o
 \end{equation}
@@ -188,56 +187,62 @@ The complete model that we defined is hence the following, where $w_o((i,j)) = w
 \begin{align}
 & \text{maximize} \quad s - \gamma \sum_{c=1}^{k} \sum_{(i,j) \in E_o} w_o((i,j))* y_{ijc}  \\
 &\textit{s.t.}                                                                       \nonumber \\
-&\sum_{c=1}^k x_{ic} = 1                                                            \quad \forall i \in \{1, \ldots, |V|\} \\
-& y_{ijc} \geq x_{ic} + x_{jc} -1                                                    \quad \forall c \in \{1, \ldots, k\}, \forall (i,j) \in E_o \\
-& s \leq \sum_{i=1}^{|V|} x_{ic}                                                   \quad \forall c \in \{1, \ldots, k\} \\
-& \mathsf{connected}(x_{1c}, \ldots, x_{|V|c})                                       \quad \forall c \in \{1, \ldots, k\} \\
-& x_{ic} \in \{0, 1\}                                                                 \forall c \in \{1, \ldots, k\}, \forall i \in \{1, \ldots, |V|\} \\
-& y_{ijc} \in \{0, 1\}                                                               \forall c \in \{1, \ldots, k\}, \forall (i, j) \in E_o \\
+&\sum_{c=1}^k x_{ic} = 1                                                            \quad \quad \forall i \in \{1, \ldots, |V|\} \\
+& y_{ijc} \geq x_{ic} + x_{jc} -1                                                    \quad \quad \forall c \in \{1, \ldots, k\}, \forall (i,j) \in E_o \\
+& s \leq \sum_{i=1}^{|V|} x_{ic}                                                   \quad \quad \forall c \in \{1, \ldots, k\} \\
+& \mathsf{connected}(x_{1c}, \ldots, x_{|V|c})                                       \quad \quad \forall c \in \{1, \ldots, k\} \\
+& x_{ic} \in \{0, 1\}                                                                 \quad \quad \forall c \in \{1, \ldots, k\}, \forall i \in \{1, \ldots, |V|\} \\
+& y_{ijc} \in \{0, 1\}                                                               \quad \quad  \forall c \in \{1, \ldots, k\}, \forall (i, j) \in E_o \\
 & s \in \{0, \ldots, \lfloor \frac{|V|}{k} \rfloor \}                                  
 \end{align}
 
 \section{Extensions and improvements}
+We choose to use a generic discrete constraint solver to solver our non-traditional clustering problem. In the following we discuss three extensions to the above formulation that are possible thanks to the use of generic solvers and there ability to handle different types of constraints.
+
 
 \subsection{Overlapping clusters}
-Sometimes we can allow a node to be included in more than one cluster. For example, in our motivating application it is the case that a gene can serve as an essential part of different pathways. 
-
-To modify our formulation to allow for overlapping clusters we need to ensure that each node is included in \emph{at least} one cluster. To apply this modification to our formulation, we only need to replace constraints~\ref{cons:assign} with the following inequalities:
-
+It is known that genes can occur in multiple pathways, and hence we may wish to allow for nodes to be included in more than one cluster.
+To apply this modification to our formulation, we only need to replace constraints~\eqref{cons:assign} with the following inequalities:
+%
 \begin{equation}
 \sum_{j=1}^{k} x_{ij} \geq 1 \qquad i \in \{1, \ldots, |V| \}
 \end{equation}
-
-\subsection{Breaking the symmetries}
-Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two options to reduce these symmetries: 1) Assign label one to the cluster that contains node one. 2) Assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
-
+%
+\subsection{Breaking symmetries}
+Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two measures \NDT{this read 'options' but they are not (mutually excluding) options?} to reduce these symmetries: 1) assign label $1$ to the cluster that contains node $1$. 2) assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
+%
 \begin{align}
 &x_{11} = 1 \\
-&\sum_{i=1}^{|V|} x_{ij} \leq \sum_{i=1}^{|V|} x_{i,j+1} \qquad j \in \{2, \ldots, k\}
+&\sum_{i=1}^{|V|} x_{ic} \leq \sum_{i=1}^{|V|} x_{i(c+1)} \qquad c \in \{1, \ldots, k-1\}
 \end{align}
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
 \subsection{Obtaining the set of Pareto optimal solutions}
-An alternative to setting a trade-off between the two conflicting objectives is to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. To obtain the Pareto optimal solutions, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143}. We remove the size of the smallest cluster from the objective and bound it by a hard constraint. Then we iteratively solve this modified problem, each time using a bound that is one higher than the size of the smallest cluster in the previous solution (algorithm~\ref{alg:pareto}).
+In the above formulation we used the commonly employed method of reducing a bi-objective optimisation problem to a single-objective one through the use of a balancing parameter $\gamma$. An alternative solution is to use a bi-objective optimisation approach to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. As in that work, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143} to obtain the Pareto optimal solutions. To do this, we remove the size component from the objective leaving only the co-occurence part. Then we iteratively solve this modified problem, each time adding a constraint such that the size of the smallest cluster is larger than that found in the previous iteration ($m$):
+%
+\begin{align}
+\sum_{i=1}^{|V|} x_{ic} > m \quad \forall c \in \{1, \ldots, k\}
+\end{align}
+The general approach is depicted in Algorithm~\ref{alg:pareto}.
 
-\begin{algorithm}
+\begin{algorithm}[t]
 \centering
 \caption{Computing the set of Pareto optimal solutions}
 \label{alg:pareto}
 \begin{algorithmic}[1]
 \State $\mathcal{P} \gets \emptyset$ \Comment{the set of Pareto optimal solutions}
-\State $min\_size \gets 0$
+\State $m \gets 0$ \Comment{Minimum size of the previous solution}
 \Repeat
-	\State $solution \gets \textsc{MinimizePenalties}(G, W, min\_size)$
+	\State $solution \gets \textsc{MinimizePenalties}(V, G_i, G_c, k, m)$
 	\State $\mathcal{P} \gets \mathcal{P} \cup solution$
-	\State $s \gets$ size of the smallest cluster in $solution$
-	\State $min\_size \gets s+1$
+	\State $m \gets$ size of the smallest cluster in $solution$
 \Until{no $solution$ was found}
+\State \Return $\mathcal{P}$
 \end{algorithmic}
 \end{algorithm}
 
-\NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
+%\NDTi{possible story: 1) ensure connectedness: must be a path between two coclustered poins; 2) cutting plane is generate when violated. Generating 17 requires adding 16's too. Instead, can use relation between connectedness and node-cuts. Using node-cuts in constraints is over variables directly. Number of node-cuts is worst-case exponential, but one violated one is sufficient to invalidate a solution so can generate one as cutting plane. Which one? For integer values does not matter: any violated one. Common approach to finding node-cuts is using a flow problem. Can use this here as follows... Advantage of solving flow problem is that also applicable to real-valued xs. Hence algorithm is...}
 \section{Enforcing connectivity}
 \label{sec:connectivity}
 
