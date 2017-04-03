@@ -1,4 +1,4 @@
-\documentclass[conference,compsoc]{IEEEtran}
+\documentclass[conference]{IEEEtran}
 \usepackage{amssymb,amsmath,amsthm}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -75,17 +75,20 @@ In section~\ref{sec:connectivity} we introduce two methods for handling the conn
 
 \section{Motivating application}
 \label{sec:motivation}
+In cancer research, tumor tissue is collected from patients for further study. Such a tumor is basically a cell in which one or more genes have mutated. Normally that cell would be destroyed by the immune system, but in case of a tumor that cell has managed to survive and may even be growing (out of control).
+Genes and mutated genes can be identified in a tumor by sequencing the DNA of the tissue. Nowadays, this sequencing has become fairly commonplace, enabling the genome-wide measurement of mutated genes across large groups of cancer patients.
 
-Cancer sequencing has become fairly commonplace, enabling the genome-wide measurement of somatic mutations across large groups of cancer patients.
-The key challenges when interpreting these data are to detect the genes that affect the creation and development of cancer and to gain an understanding of their interaction.
+The key challenges when interpreting these data are to detect the (mutated) genes that affect the creation and development of cancer and to gain an understanding of their interaction. Initially, the main focus by the community was solely on the detection of key driver genes. However, there are typically many mutated genes making it challenging to detect rare ones with high statistical significance. For this reason, there is recently a rise in methods aiming to exploit the information contained in the human interaction network \cite{some_methods}. This network expresses which genes interact with each other. This can be used to verify that a set of genes interact with each other.
 
-Initially, the main focus by the community was solely on the detection of key driver mutations. Since the long tail of the frequency distribution of somatically mutated genes makes it challenging to detect rare mutations with high statistical significance, we have recently seen the rise of methods aiming to exploit the information contained in the human interaction network \cite{some_methods}. By incorporating such biological pathway information, a superior selection and understanding of genes and their interactions is possible. These new methods do introduce novel challenges. We notice that the underlying mechanisms that affect individual patients are not always easily distinguishable from the extracted subgraphs. More specifically, it is the case that the pathways contained in these subgraphs may be connected to one another or even overlap.
+In our setting we start by considering a subgraph of the human interaction network containing only those genes and interactions that were identified as being highly relevant to a particular cancer. Each node represents a gene or gene product, and each edge represent an interaction between a pair of nodes. The graph may consist of multiple connected components. It is our goal to separate distinct \textit{pathways} from each of these components, where a pathway is a set of genes that interact with each other.
 
-However, it is known that the creation and growth of tumors follows a clonal evolutionary model. For a tumor this means that after disrupting a single gene, a fitness increase may no longer be received when disrupting additional genes in that gene's associated pathways. Because of this, multiple mutations within a single pathway are often redundant, and consequently less commonly observed within individual patients. In the presence of patient-mutation data, this property allows us to distinguish pathways from one another by enforcing that individual patients have as few mutations as possible assigned to one and the same pathway.
+By incorporating such biological pathway information, a superior selection and understanding of genes and their interactions is possible. %These new methods do introduce novel challenges. We notice that the underlying mechanisms that affect individual patients are not always easily distinguishable from the extracted subgraphs. More specifically, it is the case that the pathways contained in these subgraphs may be connected to one another or even overlap.
+%
+A difficult challenge however is how to determine that two genes are more likely to belong to the same or to a different pathway. Fortunately, it is known that the creation and growth of tumors follows a clonal \textit{evolutionary} model. Following this model, it is unlikely that within a single pathway a tumor would disrupt and mutate different genes. Indeed, it is sufficient to disrupt one gene to disrupt the pathway, and hence evolutionarily there is little intensive to disrupt others as well. As a consequence, it is less common that multiple mutated genes of a single pathway are observed within the same patient. We can hence compute a co-occurrence penalty score for each pair of genes, based on the harm associated with the mutations and the number of patients in which that pair was observed.
 
-As such there exists a demand for a method that can perform overlapping clustering in the presence of can-not-link constraints, where each cluster forms a connected component.
+While obtaining pathways with a low penalty is important, one should not go as far as dividing each gene into small clusters. For this reason, we will aim to balance the size of the (smallest) pathway with the amount of penalty the pathways incur.
 
-%Consider a subgraph of the human interaction network containing only those genes and interactions that were identified as being highly relevant to a particular cancer. Each node represents a gene or gene product, and each edge represent an interaction between a pair of nodes. The graph may consist of multiple connected components. It is our goal to separate distinct pathways from each of these components. Each pathway is connected, thus motivating the usage of connectivity constraints. The rule that pairs of mutated genes within individual patients should not be assigned to the same pathway can be imposed using can-not-link constraints. Since there are several known exceptions to this rule, we require the usage of soft constraints. The penalty associated with violating such a constraint is a function of the harm associated with the mutations and the number of patients in which that pair was observed.
+
 
 \begin{figure}
 \centering
