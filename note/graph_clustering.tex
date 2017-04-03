@@ -397,6 +397,29 @@ The code and the data will be made available upon publication of this paper.
 
 \subsection{Results and discussion}
 
+\subsubsection{Biological validation}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.33]{images/Plot_clusters_per_subtype_4Groups.jpeg}
+\captionsetup{font=small}
+\captionof{figure}{Number of patients which are a member of each cluster, per PAM50 subtype.}
+\label{fig:cutset}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.33]{images/Plot_subtypes_per_cluster_4Groups.jpeg}
+\captionsetup{font=small}
+\captionof{figure}{Number of patients with specific PAM50 subtype, per cluster.}
+\label{fig:cutset}
+\end{figure}
+
+
+In order to validate the results of the clustering approach, we looked at the PAM50 tumor subtype classification \cite{parker2009supervised}, which was previously published for the patients in our cohort by the Cancer Genome Atlas Network \cite{cancer2012comprehensive}. PAM50 subtypes are determined by looking at the expression levels of 50 specific genes from a breast cancer sample in order to assign an “intrinsic” subtype to the patient’s tumor. As this is based on expression data, rather than mutational data which is used in our clustering approach, correlation between the PAM50 subtypes and the identified clusters would be interesting as this would enable us to (partially) subtype breast cancer tumors based on mutational data. Furthermore, as the PAM50 tumor subtype classification have prognostic significance, correlation between the clusters and the PAM50 tumor subtypes would largely validate our clustering approach as being biologically relevant in a real-world cancer setting.
+We analyzed the data using 4 clusters, a parameter of 0.5 and we prohibited any overlap in the nodes (genes) of our network. We then assessed every patient in our dataset for membership of one (or more) of the cluster. A patient was a member of a specific cluster when that patient had at least one deleterious mutations (defined as a PHRED-scaled CADD score of at least 20 \cite{kircher2014general}). The results of this analysis are depicted in Figure x and Figure y. We performed a χ-square goodness of fit test on the distribution of the basal-like PAM50 subtype from Figure x and on both the distributions of cluster 1 and cluster 2 from Figure y to test whether they deviated from a random assignment of patients to clusters. All three distributions deviated significantly from the random case (Basal-like: χ-squared = 103.48, df = 3, p-value < 2.2e-16; cluster 1: χ-squared = 15.507, df = 4, p-value =0.003757; Cluster 2: χ-squared = 22.388, df = 4, p-value = 0.0001678).
+Based on these results and the observations from figure x and figure y, two interesting conclusions could be drawn: 1) patients with a basal-like PAM50 tumor subtype were very likely to have a mutation in cluster 4 and 2) patients with a mutation in cluster 1 or cluster 2 were more likely to have a luminal A subtype. This shows that the identified gene clusters have at least some correlation with the PAM50 subtypes and could thus be useful in patient subtyping and exploring subsequent treatment options although more research would be needed to confirm this. As such our subtyping method is able to generate meaningful biological results in a cancer subtyping setting.
+
 \section{Related work}
 \label{sec:related}
 There are several studies that using mathematical programming
