@@ -349,17 +349,10 @@ It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:sepa
 \begin{algorithmic}[1]
 \State $\mathcal{C} \gets \emptyset$ \Comment{Set of constraints to add}
 \For{$c \in \{1, \ldots, k\}$}
-	\State $\delta \gets 0$ \Comment{maximum violation}
-	\State $\mathcal{C}_c \gets \emptyset$	\Comment{most violated constraint of $c$}
 	\For{$u, v$ such that $(u, v) \notin E_i$ and $x_{uc}^* + x_{vc}^* > 1$}
-		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_c, G_i)$ 
-		\State $\Delta \gets x_{uc}^* + x_{vc}^* - 1 - \sum_{w \in S^*} x_{wc}^*$
-		\If{$\Delta > \delta$ }\Comment{maximum violation}
-			\State $\mathcal{C}_c \gets \{\sum_{w \in S^*} x_{wc} \geq x_{uc} + x_{vc} - 1\}$
-			\State $\delta \gets \Delta$			
-		\EndIf
+		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_c, G_i)$
+		\State $\mathcal{C} \gets \mathcal{C} \cup \{\sum_{w \in S^*} x_{wc} \geq x_{uc} + x_{vc} - 1\}$
 	\EndFor
-	\State $\mathcal{C} \gets \mathcal{C} \cup \mathcal{C}_c$
 \EndFor
 \State Add constraints $\mathcal{C}$ to the model
 \end{algorithmic}
@@ -382,10 +375,10 @@ In this section we will evaluate the suitability of our algorithms to address th
 
 
 \subsection{Experiment setting}
-We ran the experiments on Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the python interface
-of \emph{Gurobi-7}\footnote{www.gurobi.com}. To solve the separation problem, we used the implementation of min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. 
+We ran experiments on Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the python interface
+of \emph{Gurobi-7}\footnote{www.gurobi.com}.
 
-To use this implementation for our problem, we replaced
+To solve the separation problem, we used the min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. To use this algorithm we replaced
 each undirected edge by two opposite directed edges. The capacity of
 these edges is infinite. Then we replaced each node $v$ by two
 nodes $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
@@ -393,7 +386,7 @@ edges, with capacities equal to the capacity of $v$. We obtain the
 minimum node cut separating $u$ and $v$ by computing the minimum cut
 between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 
-We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: We added the most violated constraint for \emph{all} non-adjacent pairs of nodes. We added cuts to the
+We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: we added cuts to the
 linear relaxation only at the root node of the branch-and-cut tree.
 Moreover, when adding cuts to the relaxation, we monitored the change in
 the value of objective function, and stopped adding the cuts if this
@@ -401,30 +394,26 @@ value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
 
-We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in this application.
-
+We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application.
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
-
-
+%
+\NDTi{for Behrouz: something about the data}
 The code and the data will be made available upon publication of this paper.
 
 \subsection{Results and discussion}
+\subsubsection{Scalability of the two approaches}
+We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.5,1,2,3,4,5,10\}$ values\NDT{Dries/Behrouz: check $\gamma$ values, guessed by Tias}. Table~\ref{table:runtime} shows the results. As can be seen... \NDT{to complete}
 
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.4]{images/gamma_smallest_cluster_size}
-\captionsetup{font=small}
-\caption{TODO for instance \emph{250\_750}}
-\label{fig:gamma_cluster}
-\end{figure}
+\subsubsection{Impact of $\gamma$}
+The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty.
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.4]{images/gamma_total_penalty_incurred}
+\includegraphics[scale=0.25]{images/gamma_smallest_cluster_size}
+\includegraphics[scale=0.25]{images/gamma_total_penalty_incurred}
 \captionsetup{font=small}
-\caption{TODO We have no consistency in the line plots style :'( for instance \emph{250\_750}}
-\label{fig:gamma_penalty}
+\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \emph{250\_750}}
+\label{fig:gamma}
 \end{figure}
 
 \begin{figure}
@@ -435,14 +424,12 @@ The code and the data will be made available upon publication of this paper.
 \label{fig:pareto}
 \end{figure}
 
-\NDBi{The numbers in table~\ref{table:runtime} are not correct. Just a placeholder!}
-
 
 
 \begin{table}
 \centering
 \captionsetup{font=small}
-\captionof{table}{Average runtimes of overlapping and non-overlapping clustering by enumerating all simple paths (ENUM) and branch and cut (BnC). The runtime for timed-out experiments is counted as 1800.}
+\captionof{table}{Average runtimes of overlapping and non-overlapping clustering by enumerating all simple paths (ENUM) and branch and cut (BnC). The runtime for timed-out experiments is counted as 600 seconds (--).}
 \label{table:runtime}
 
 \begin{tabular}{|ll|rr|rr|}
@@ -450,38 +437,38 @@ The code and the data will be made available upon publication of this paper.
 		 &   &  \multicolumn{2}{|c|}{\emph{overlapping}} & \multicolumn{2}{|c|}{\emph{non-overlapping}} \\
          \cline{3-6}
 \emph{instance} & \emph{k} &  \textbf{ENUM} &  \textbf{BnC} &  \textbf{ENUM} &  \textbf{BnC} \\
-\hline         
-200\_1000 & 2 &     741.665 &    11.897 &       0.319 &    13.398 \\
-         & 3 &     743.065 &    18.182 &       4.474 &    15.007 \\
-         & 4 &     749.909 &    29.101 &      15.578 &    52.262 \\
-\hdashline[.4pt/1pt]         
+\hline      
+200\_1000 & 2 &     247.547 &    11.897 &       0.319 &    13.398 \\
+         & 3 &     248.948 &    18.182 &       4.474 &    15.007 \\
+         & 4 &     255.792 &    29.101 &      15.578 &    52.262 \\
+\hdashline[.4pt/1pt]                              
 200\_1250 & 2 &     269.871 &    45.216 &     121.712 &    38.363 \\
-         & 3 &    1482.217 &    54.101 &     367.490 &    65.178 \\
-         & 4 &        1800 &   167.424 &    1651.002 &   204.146 \\
-\hdashline[.4pt/1pt]         
-250\_1000 & 2 &    1278.850 &    75.920 &     602.993 &    64.508 \\
-         & 3 &    1722.176 &   114.766 &    1661.077 &   204.145 \\
-         & 4 &        1800 &   200.899 &         --  &       --  \\
-\hdashline[.4pt/1pt]         
+         & 3 &     564.570 &    54.101 &     300.823 &    65.178 \\
+         & 4 &         --  &   167.424 &     592.178 &   204.146 \\
+\hdashline[.4pt/1pt]                              
+250\_1000 & 2 &     502.380 &    75.920 &     320.640 &    64.508 \\
+         & 3 &     592.765 &   114.766 &     --       &   204.145 \\
+         & 4 &         --  &   200.899 &         --   &       --   \\
+\hdashline[.4pt/1pt]                              
 250\_750 & 2 &       0.155 &     4.061 &       0.022 &     4.006 \\
          & 3 &       0.313 &     6.866 &       0.402 &     4.242 \\
-         & 4 &       0.695 &    10.698 &       0.642 &     7.848 \\
-\hdashline[.4pt/1pt]         
-300\_750 & 2 &     741.372 &    12.602 &     741.299 &    10.314 \\
-         & 3 &     741.624 &    19.561 &     741.654 &    18.370 \\
-         & 4 &     742.193 &    29.513 &     743.293 &    53.465 \\
-\hdashline[.4pt/1pt]         
-350\_500 & 2 &     741.179 &     0.095 &       0.003 &     0.151 \\
-         & 3 &     741.180 &     0.142 &       0.021 &     0.257 \\
-         & 4 &     741.181 &     0.181 &       0.039 &     0.211 \\
-\hdashline[.4pt/1pt]         
+         & 4 &       --    &    10.698 &       0.642 &     7.848 \\
+\hdashline[.4pt/1pt]                              
+300\_750 & 2 &     247.255 &    12.602 &     247.182 &    10.314 \\
+         & 3 &     247.507 &    19.561 &     247.536 &    18.370 \\
+         & 4 &     248.075 &    29.513 &     249.175 &    53.465 \\
+\hdashline[.4pt/1pt]                              
+350\_500 & 2 &     247.061 &     0.095 &       0.003 &     0.151 \\
+         & 3 &     247.062 &     0.142 &       0.021 &     0.257 \\
+         & 4 &     247.063 &     0.181 &       0.039 &     0.211 \\
+\hdashline[.4pt/1pt]                              
 350\_750 & 2 &       0.459 &    43.051 &       0.538 &    19.780 \\
          & 3 &       1.875 &    95.039 &       2.036 &    57.167 \\
-         & 4 &       7.210 &   656.770 &       9.253 &   476.338 \\
-\hdashline[.4pt/1pt]         
-450\_750 & 2 &     742.094 &   120.781 &     741.961 &    92.776 \\
-         & 3 &     747.462 &   569.116 &     425.119 &   408.460 \\
-         & 4 &     660.344 &   836.816 &      75.395 &      1800 \\
+         & 4 &       7.210 &   303.829 &       9.253 &   335.162 \\
+\hdashline[.4pt/1pt]                              
+450\_750 & 2 &     247.977 &   120.781 &     247.843 &    92.776 \\
+         & 3 &     253.345 &   286.763 &     148.196 &   316.153 \\
+         & 4 &     260.344 &   356.816 &      75.395 &       --  \\
 \hline
 \end{tabular}
 \end{table}
