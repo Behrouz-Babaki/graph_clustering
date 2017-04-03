@@ -224,7 +224,7 @@ Clustering problems often have an inherent symmetry which is due to the fact tha
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
 
-\subsection{Obtaining the set of Pareto optimal solutions}
+\subsection{Obtaining the set of Pareto optimal solutions} \label{sec:pareto}
 In the above formulation we used the commonly employed method of reducing a bi-objective optimisation problem to a single-objective one through the use of a balancing parameter $\gamma$. An alternative solution is to use a bi-objective optimisation approach to compute the set of \emph{Pareto optimal} solutions. A solution of a bi-objective optimization problem is Pareto optimal if there is no other solution with a better quality with respect to both objectives. Obtaining the set of Pareto optimal solutions for other types of bi-objective constrained clustering has been studied before~\cite{GunsDVD16}. As in that work, we use a method based on the $\epsilon$-constraint algorithm~\cite{DBLP0015143} to obtain the Pareto optimal solutions. To do this, we remove the size component from the objective leaving only the co-occurence part. Then we iteratively solve this modified problem, each time adding a constraint such that the size of the smallest cluster is larger than that found in the previous iteration ($m$):
 %
 \begin{align}
@@ -405,16 +405,19 @@ The code and the data will be made available upon publication of this paper.
 We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.5,1,2,3,4,5,10\}$ values\NDT{Dries/Behrouz: check $\gamma$ values, guessed by Tias}. Table~\ref{table:runtime} shows the results. As can be seen... \NDT{to complete}
 
 \subsubsection{Impact of $\gamma$}
-The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty.
+The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty. We showcase the effect of the parameter on these two components of the objective in Figure~\ref{fig:gamma} for instance 250\_750. As $\gamma$ approaches $0$ most weight is given to the size leading to increasing larger minimum clusters but also a sharp incline in the total co-occurence penalty. For too high $\gamma$ values, $\geq 4$in this case, the size of the clusters can drop to values of 1 or 2, which are not meaningful. In this case, a $\gamma$ between 1 and 3 seems most sensible.
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.25]{images/gamma_smallest_cluster_size}
 \includegraphics[scale=0.25]{images/gamma_total_penalty_incurred}
 \captionsetup{font=small}
-\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \emph{250\_750}}
+\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \emph{250\_750}.}
 \label{fig:gamma}
 \end{figure}
+
+\subsubsection{Pareto optimal set}
+As explained in Section~\ref{sec:pareto} one can also use generic solvers to compute the Pareto-optimal set directly instead of having to determine a $\gamma$ parameter.
 
 \begin{figure}
 \centering
