@@ -6,6 +6,7 @@
 \usepackage{caption}
 \usepackage{cite}
 \usepackage{sidecap}
+\usepackage{arydshln}
 
 \usepackage[dvipsnames]{xcolor}
 \colorlet{lhue}{SpringGreen}
@@ -290,67 +291,68 @@ These constraints ensure there exists at least one path in the interaction graph
  In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution, a cut, is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given an assignment $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem.
  In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. \NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
 
- 
- Applying the cutting plane method to the formulation of section~\ref{sec:bnc} is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}. Therefore we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The following definition and theorem are taken from~\cite{CarvajalCGVW13}.
+ A cutting plan approach with the formulation of connectivity from the previous section would require us to add both variables (the $y_rc$ ones) and constraints \eqref{cons:path} and \eqref{cons:pconnect} for each cut.
+% Applying the cutting plane method to the formulation of connectivity in the previous subsection is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}.
+Instead, we adopt the approach of ~\cite{CarvajalCGVW13} which defines the connectivity constraints in terms of \emph{node-cut sets}. The advantage is that no extra variables need to be introduced, and that between two nodes the connectivity can be broken incrementally with individual constraints. The following definition and theorem are taken from~\cite{CarvajalCGVW13}.
 
 \begin{definition}[Node-cut set]
 Given nodes $u, v \in V$ that are not adjacent ($(u, v) \notin E$), a set of nodes $S \subseteq V \setminus \{u, v\}$ is a \emph{node-cut set} separating $u$ and $v$ (or simply a \emph{$uv$-node cut}) if all paths between $u$ and $v$ intersect $S$.
 \end{definition}
-
+There is hence at least one node from every path between $u$ and $v$ in the $uv$-node cut.
 A $uv$-node cut is \emph{minimal} if it is not a $uv$-node cut after removing any of its nodes. For a pair of non-adjacent nodes $u$ and $v$, we denote by $\Gamma(u, v)$ the set of all minimal $uv$-node cut sets. Figure~\ref{fig:cutset} shows examples of minimal node-cut sets. The following theorem relates the connectivity of a graph to its minimal node-cut sets. 
-
+%
 \begin{SCfigure}[1.2]
 \centering
 \includegraphics[scale=0.7]{images/cutset}
 \captionsetup{font=small}
-\captionof{figure}{The sets \{2, 5\} and \{3, 5\} belong to $\Gamma(1, 4)$, but the set \{2, 3, 5\} does not.}
+\captionof{figure}{The sets \{2, 5\} and \{3, 5\} belong to $\Gamma(1, 4)$, but the set \{2, 3, 5\} does not because it is not minimal.}
 \label{fig:cutset}
 \end{SCfigure}
-
+%
 \begin{theorem}
 Given $U \subseteq V$ and a pair of non-adjacent nodes $u, v \in U$, there exists a path between $u$ and $v$ in the subgraph induced by $U$ if and only if all $uv$-node cuts $S$ are such that $S \cap U \neq \emptyset$.
 \label{theorem:cutset}
 \end{theorem}
-
-According to theorem~\ref{theorem:cutset} to ensure that cluster $c$ is connected, the following condition should hold for each $uv$-node cut $S$:
-
+%
+For every $uv$-node cut $S$ this theorem states thatto ensure that cluster $c$ is connected, at least one node in the node cut must belong to the cluster:
+%
 \begin{equation*}
 (x_{uc}=1 \land x_{vc}=1) \Rightarrow \lor_{w \in S} (x_{wc}=1)
 \end{equation*}
 
 By translating this condition into linear constraints we can formulate the constraint $\mathsf{connected}(x_{1c}, \ldots, x_{|V|c})$ as follows:
-
+%
 \begin{multline}
 \sum_{w \in S} x_{wc} \geq x_{uc} + x_{vc} - 1 \\
-\forall S \in \Gamma(u, v), \forall (u, v) \in V, (u, v) \notin E
+\forall \forall (u, v) \in V, (u, v) \notin E, S \in \Gamma(u, v)
 \label{eq:connectivity}
 \end{multline}
 
-The constraint set~\ref{eq:connectivity} contains an exponential number of constraints. Following the cutting plane method, we will iteratively add some of the violated constraints to the model. A common practice is to add one or some of the \emph{most violated} constraints in each iteration. Suppose that we want to add the most violated constraint in each cluster. We do so by evaluating the maximum degree of violation induced by each pair of non-adjacent nodes in each cluster. 
+The constraint set~\eqref{eq:connectivity} contains an exponential number of constraints. Following the cutting plane method, we will iteratively add some of the violated constraints to the model. A common practice is to add one or some of the constraints \emph{most violated} by the current solution in each iteration.
 
-Given a solution $\mathbf{x}^*$ of the problem, let us denote the value of $x_{ic}$ variables in this solution by $x^*_{ic}$ and the vector of variables corresponding to cluster $c$ by $\mathbf{x}^*_c$.If $\mathbf{x}^*$ is an integer solution, a constraint in~\ref{eq:connectivity} is violated if and only if $\sum_{w \in S} x^*_{wc} = 0$. However for non-integer solutions there could be different degrees of violation. To find the most violated constraint in cluster $c$ we need to find the following set for each non-adjacent pair $(u, v)$:
+Given a solution $\mathbf{x}^*$ of the problem, let us denote the value of $x_{ic}$ variables in this solution by $x^*_{ic}$ and the vector of variables corresponding to cluster $c$ by $\mathbf{x}^*_c$.
+In this respect, a first observation is that $\sum_{w \in S} x^*_{wc} \geq 0$ is always true as the $x^*$ are Boolean variables. Hence, the constraint can only be violated if $x^*_{uc} + x^*_{vc} - 1 > 0$, that is, if both variables belong to the same cluster. If that is the case, then the constraint can only be violated if $\sum_{w \in S} x^*_{wc} = 0$, that is, if none of the nodes in the cut set are in the cluster. If no such constraint can be found that the connectivity constraint is satisfied.
+
+The same principle can be used on real-valued solutions (as computed by the MIP solver when solving the linear relaxation). The most violated constraint for a non-adjacent pair $(u,v)$ is now the constraint for which $x^*_{uc} + x^*_{vc} - 1 > 0$ and that minimizes $\sum_{w \in S} x^*_{wc}$. To add a cut of $(u,v)$ in the cutting plane algorithm, the goal is hence to find the node-cut set $S^*$,
 \begin{equation}
 S^* =\underset{S \in \Gamma(u, v)}{\mathrm{argmin}} \sum_{w \in S} x^*_{wc}
 \label{eq:separation}
 \end{equation}
+%If $\sum_{w \in S^*} x_{wc}^* < x^*_{uc} + x^*_{vc} - 1$ then the equality~\ref{eq:connectivity} induced by $u, v, S^*$ is violated. If no such violated constraint is found, then the solution is optimal.
 
-If $\sum_{w \in S^*} x_{wc}^* < x^*_{uc} + x^*_{vc} - 1$ then the equality~\ref{eq:connectivity} induced by $u, v, S^*$ is violated. If no such violated constraint is found, then the solution is optimal.
-
-
- 
-It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:separation} can be computed efficiently: If we assign $x^*_{ic}$ as the capacity of node $i$, the separation problem reduces to finding the minimum capacity node cut separating $u$ and $v$. This problem can be solved using any standard \emph{min-cut} algorithm. A summary of the cut generation procedure is presented in algorithm~\ref{alg:cut}. 
+It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:separation} can be computed efficiently: If we use $x^*_{ic}$ as the capacity of node $i$, the separation problem reduces to finding the minimum capacity node cut separating $u$ and $v$. This problem can be solved using any standard \emph{min-cut} algorithm. A summary of the cut generation procedure is presented in algorithm~\ref{alg:cut}, where for each cluster the most violated constraint among its node-pairs is added.
 
 \begin{algorithm}
 \centering
 \caption{The cut-generation procedure}
 \label{alg:cut}
 \begin{algorithmic}[1]
-\State $\mathcal{C} \gets \emptyset$
+\State $\mathcal{C} \gets \emptyset$ \Comment{Set of constraints to add}
 \For{$c \in \{1, \ldots, k\}$}
-	\State $\delta \gets 0$
-	\State $\mathcal{C}_c \gets \emptyset$	
-	\For{$u, v$ such that $(u, v) \notin E$ and $x_{uc}^* + x_{vc}^* > 1$}
-		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_c)$ 
+	\State $\delta \gets 0$ \Comment{maximum violation}
+	\State $\mathcal{C}_c \gets \emptyset$	\Comment{most violated constraint of $c$}
+	\For{$u, v$ such that $(u, v) \notin E_i$ and $x_{uc}^* + x_{vc}^* > 1$}
+		\State $S^* \gets \text{min-cut}(u, v, {\mathbf{x}}^{*}_c, G_i)$ 
 		\State $\Delta \gets x_{uc}^* + x_{vc}^* - 1 - \sum_{w \in S^*} x_{wc}^*$
 		\If{$\Delta > \delta$ }\Comment{maximum violation}
 			\State $\mathcal{C}_c \gets \{\sum_{w \in S^*} x_{wc} \geq x_{uc} + x_{vc} - 1\}$
@@ -445,42 +447,41 @@ The code and the data will be made available upon publication of this paper.
 
 \begin{tabular}{|ll|rr|rr|}
 \hline
-		 &   &  \multicolumn{2}{|c|}{overlapping} & \multicolumn{2}{|c|}{non-overlapping} \\
-         &   & \cline{1-4}		 
-         &   &  ENUM &  BnC &  ENUM &  BnC \\
-instance & k &             &           &             &           \\
-\hline
-200\_1000 & 2 &     467.092 &    12.453 &     467.092 &    12.453 \\
-         & 3 &     469.513 &    17.006 &     469.513 &    17.006 \\
-         & 4 &     477.935 &    37.679 &     477.935 &    37.679 \\
+		 &   &  \multicolumn{2}{|c|}{\emph{overlapping}} & \multicolumn{2}{|c|}{\emph{non-overlapping}} \\
+         \cline{3-6}
+\emph{instance} & \emph{k} &  \textbf{ENUM} &  \textbf{BnC} &  \textbf{ENUM} &  \textbf{BnC} \\
 \hline         
-200\_1250 & 2 &     195.791 &    41.790 &     195.791 &    41.790 \\
-         & 3 &     908.929 &    59.797 &     908.929 &    59.797 \\
-         & 4 &    1725.501 &   185.785 &    1725.501 &   185.785 \\
-\hline         
-250\_1000 & 2 &     940.922 &    70.214 &     940.922 &    70.214 \\
-         & 3 &    1691.626 &   159.455 &    1691.626 &   159.455 \\
-         & 4 &    1800.000 &   200.899 &    1800.000 &   200.899 \\
-\hline         
-250\_750 & 2 &       0.089 &     4.033 &       0.089 &     4.033 \\
-         & 3 &       0.357 &     5.554 &       0.357 &     5.554 \\
-         & 4 &       0.669 &     9.273 &       0.669 &     9.273 \\
-\hline         
-300\_750 & 2 &     741.336 &    11.458 &     741.336 &    11.458 \\
-         & 3 &     741.639 &    18.966 &     741.639 &    18.966 \\
-         & 4 &     742.743 &    41.489 &     742.743 &    41.489 \\
-\hline         
-350\_500 & 2 &     466.669 &     0.116 &     466.669 &     0.116 \\
-         & 3 &     466.677 &     0.185 &     466.677 &     0.185 \\
-         & 4 &     466.684 &     0.192 &     466.684 &     0.192 \\
-\hline         
-350\_750 & 2 &       0.499 &    31.416 &       0.499 &    31.416 \\
-         & 3 &       1.955 &    76.103 &       1.955 &    76.103 \\
-         & 4 &       8.231 &   566.554 &       8.231 &   566.554 \\
-\hline         
-450\_750 & 2 &     742.028 &   106.779 &     742.028 &   106.779 \\
-         & 3 &     607.781 &   499.499 &     607.781 &   499.499 \\
-         & 4 &     426.364 &  1222.089 &     426.364 &  1222.089 \\
+200\_1000 & 2 &     741.665 &    11.897 &       0.319 &    13.398 \\
+         & 3 &     743.065 &    18.182 &       4.474 &    15.007 \\
+         & 4 &     749.909 &    29.101 &      15.578 &    52.262 \\
+\hdashline[.4pt/1pt]         
+200\_1250 & 2 &     269.871 &    45.216 &     121.712 &    38.363 \\
+         & 3 &    1482.217 &    54.101 &     367.490 &    65.178 \\
+         & 4 &        1800 &   167.424 &    1651.002 &   204.146 \\
+\hdashline[.4pt/1pt]         
+250\_1000 & 2 &    1278.850 &    75.920 &     602.993 &    64.508 \\
+         & 3 &    1722.176 &   114.766 &    1661.077 &   204.145 \\
+         & 4 &        1800 &   200.899 &         --  &       --  \\
+\hdashline[.4pt/1pt]         
+250\_750 & 2 &       0.155 &     4.061 &       0.022 &     4.006 \\
+         & 3 &       0.313 &     6.866 &       0.402 &     4.242 \\
+         & 4 &       0.695 &    10.698 &       0.642 &     7.848 \\
+\hdashline[.4pt/1pt]         
+300\_750 & 2 &     741.372 &    12.602 &     741.299 &    10.314 \\
+         & 3 &     741.624 &    19.561 &     741.654 &    18.370 \\
+         & 4 &     742.193 &    29.513 &     743.293 &    53.465 \\
+\hdashline[.4pt/1pt]         
+350\_500 & 2 &     741.179 &     0.095 &       0.003 &     0.151 \\
+         & 3 &     741.180 &     0.142 &       0.021 &     0.257 \\
+         & 4 &     741.181 &     0.181 &       0.039 &     0.211 \\
+\hdashline[.4pt/1pt]         
+350\_750 & 2 &       0.459 &    43.051 &       0.538 &    19.780 \\
+         & 3 &       1.875 &    95.039 &       2.036 &    57.167 \\
+         & 4 &       7.210 &   656.770 &       9.253 &   476.338 \\
+\hdashline[.4pt/1pt]         
+450\_750 & 2 &     742.094 &   120.781 &     741.961 &    92.776 \\
+         & 3 &     747.462 &   569.116 &     425.119 &   408.460 \\
+         & 4 &     660.344 &   836.816 &      75.395 &      1800 \\
 \hline
 \end{tabular}
 \end{table}
