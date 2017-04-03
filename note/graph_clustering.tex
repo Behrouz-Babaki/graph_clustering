@@ -119,7 +119,7 @@ A graph $G=(V, E)$ consists of a set of nodes $G$ and a set of edges $E$. Each e
 A graph is \emph{simple} if it does not have any loops or double edges.
 A graph is \emph{connected} if there is a path between each pair of its nodes. The nodes on a path except the first and last ones are called the \emph{intermediate nodes}. A \emph{simple path} is a path with no cycles. Another important concept is that of an induced subgraph. Given a set of nodes $V' \subseteq V$, the \textit{ induced subgraph} of $G$ on $V'$ is a graph $G[V']$ that contains only the nodes in $V'$ and only the edges of $G$ that have both endpoints in $V'$. 
 
-\subsection{Problem definition}
+\subsubsection{Problem definition}
 Our problem is as follows: given a set of genes $V$, a simple undirected graph $G_i=(V,E_i)$ representing the interaction network and a simple weighted undirected graph $G_o=(V,E_o)$ with weight function $w_o$ representing the co-occurence network. The goal is to partition $V$ into $k$ different groups $V_1,\ldots,V_k$, where $k$ is assumed given. Each cluster induces a subgraph on the interaction graph $G_i$ and that subgraph \textit{must be connected}. The quality of a clustering is determined by the size and co-occurence penalty of the clusters. The two are linearly combined using $\gamma$ to obtain the following objective that must be maximized:
 \begin{equation}
 f(V_1,\ldots,V_k) = min_{c=1}^{k} |V_c| - \gamma \sum_{c=1}^{k} \sum_{e \in G_o[V_c]} w_o(e) \label{eq:def}
@@ -144,7 +144,7 @@ The first component represents the size of the smallest cluster while the second
 %positive parameter specified by user which determines the relative importance of each of the two goals.
 
 
-\subsection{Mixed integer programming}
+\subsubsection{Mixed integer programming}
 We can formulate this problem as an integer linear program. The main
 decision variables in this formulation are those that determine the
 assignment of nodes to the clusters. We will use binary variables $x_{ic}$ indicates whether or not node $i$ is included in
@@ -198,7 +198,6 @@ The complete model that we defined is hence the following, where $w_o((i,j)) = w
 \end{align}
 
 \section{Extensions and improvements}
-\NDBi{We can collect the following into a new section}
 
 \subsection{Overlapping clusters}
 Sometimes we can allow a node to be included in more than one cluster. For example, in our motivating application it is the case that a gene can serve as an essential part of different pathways. 
