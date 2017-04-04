@@ -72,12 +72,24 @@ The problem we study in this paper is such a graph clustering problem that does 
 % contributions
 More specifically, are contributions are as follows: 1) we identify a new bi-objective constrained graph clustering with applications in bio-informatics and present a MIP formulation of the problem; 2) to better handle the large number of connectivity constraints, we propose a branch-and-cut approach that adds connectivity constraints as needed using the principle of node-cut sets. Our experiments demonstrate the effectiveness of the approach.
 
-The rest of this paper is structured as follows:  In
+The rest of this paper is structured as follows: we first discuss related work. In
 section~\ref{sec:motivation} we present the application that motivates
 this problem.  Section~\ref{sec:definition} introduces the formal
 problem definition and a MIP formulation with the connectivity requirement.
-In section~\ref{sec:connectivity} we introduce two methods for handling the connectivity requirement, including a cutting plane approach. Section~\ref{sec:experiments} contains the experiments, followed by related work in section~\ref{sec:related} after which we conclude.
+In section~\ref{sec:connectivity} we introduce two methods for handling the connectivity requirement, including a cutting plane approach. Section~\ref{sec:experiments} contains the experiments after which we conclude.
 
+
+\section{Related work}
+\label{sec:related}
+There are several studies that using mathematical programming
+for clustering and graph partitioning
+problems~\cite{HansenJ97}. In addition to integer linear programming, semidefinite programming~\cite{ArmbrusterFHM08,LisserR03}, and quadratic programming~\cite{FanP10} formulations has also been used for solving these problems. Techniques such as branch-and-cut~\cite{FerreiraMSWW98,GrotschelW89} and branch-and-price~\cite{MehrotraT98,JiM07} have been used to improve the performance. 
+
+The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem. In most variants of graph partitioning problem, the edges, nodes, or both are weighted. The number of clusters can be specified by user or decided by the algorithm. Two most prominent types of objective functions are 1) the total weight of the edges that have endpoints in different clusters and 2) the total weight fo the edges that have endpoints in the same cluster. Depending on the meaning of the weights, these function are minimized or maximized. In either case, these objectives are meant to increase the homogeneity of clusters.  
+
+Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{LabbeO10}. Other types of constraints include constraint on the size of clusters~\cite{FanP10}, and constraints on total weight of nodes in a cluster~\cite{FerreiraMSWW98}. 
+
+The main difference of our problem with the existing problems is that we have two graphs, where the edges of the co-occurrence graph are weighted but the goal is to minimize their total value. The connectivity of the nodes in the interaction network are required and must hence be added as hard constraints. The graph partitioning problem of \cite{Benati2017} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
 
 \section{Motivating application}
 \label{sec:motivation}
@@ -417,7 +429,7 @@ The $\gamma$ parameter is a way of balancing the minimum size of the clusters wi
 \end{figure}
 
 \subsubsection{Pareto optimal set}
-As explained in Section~\ref{sec:pareto} one can also use generic solvers to compute the Pareto-optimal set directly instead of having to determine a $\gamma$ parameter. In Figure~\ref{fig:pareto} for the non-overlapping setting we can see that some smallest cluster values are skipped because not optimal, and that the there is a gradual increase in total violations as the minimum size increases, with an increase in incline for $k=3$ and $k=4$. This can be used to select an appropriate solution among the Pareto optimal ones.
+As explained in Section~\ref{sec:pareto} one can also use generic solvers to compute the Pareto-optimal set directly instead of having to determine a $\gamma$ parameter. In Figure~\ref{fig:pareto} for the non-overlapping setting we can see that a few smallest cluster values are skipped because not optimal, and that the there is a gradual increase in total violations as the minimum size increases, with an increase in incline near the end (there are 30 genes in this dataset). This can be used to select an appropriate solution among the Pareto optimal ones.
 
 \begin{figure}
 \centering
@@ -508,17 +520,6 @@ In order to validate the results of the clustering approach, we looked at the PA
 We analyzed the data by partitioning it into 4 non-overlapping clusters with a $\gamma$ of 0.5. We then assessed every patient in our dataset for membership of one or multiple clusters. A patient was considered a member of a specific cluster when that patient had at least one deleterious mutation (defined as a PHRED-scaled CADD score of at least 20 \cite{kircher2014general}). The results of this analysis are depicted in Figure \ref{fig:plot_clusters_subtype} and Figure \ref{fig:plot_subtypes_cluster}. We performed a $\chi$-square goodness of fit test on the distribution of the basal-like PAM50 subtype from Figure \ref{fig:plot_clusters_subtype} and on both the distributions of cluster 1 and cluster 2 from Figure \ref{fig:plot_subtypes_cluster} to test whether they deviated from a random assignment of patients to clusters. All three distributions deviated significantly from the random case (Basal-like: $\chi-squared = 103.48$, $df = 3$, $p-value < 2.2e-16$; cluster 1: $\chi-squared = 15.507$, $df = 4$, $p-value =0.003757$; Cluster 2: $\chi-squared = 22.388$, $df = 4$, $p-value = 0.0001678$).
 Based on these results, and the observations from figure \ref{fig:plot_clusters_subtype} and figure \ref{fig:plot_subtypes_cluster}, two interesting conclusions could be drawn: 1) patients with a basal-like PAM50 tumor subtype were very likely to have a mutation in clustered pathway 4 and 2) patients with a mutation in pathway 1 or 2 were more likely to have a luminal A subtype. This shows that the identified gene clusters / pathways have at least some correlation with the PAM50 subtypes and could thus be useful in patient subtyping and exploring subsequent treatment options, although more research would be needed to confirm this. As such, our subtyping method is able to generate meaningful biological results in a cancer subtyping setting.
 
-\section{Related work}
-\label{sec:related}
-There are several studies that using mathematical programming
-for clustering and graph partitioning
-problems~\cite{HansenJ97}. In addition to integer linear programming, semidefinite programming~\cite{ArmbrusterFHM08,LisserR03}, and quadratic programming~\cite{FanP10} formulations has also been used for solving these problems. Techniques such as branch-and-cut~\cite{FerreiraMSWW98,GrotschelW89} and branch-and-price~\cite{MehrotraT98,JiM07} have been used to improve the performance. 
-
-The are several variants of the graph partitioning problem. When the underlying graph is a complete graph, this problem is sometimes called the \emph{clique partitioning} problem. In most variants of graph partitioning problem, the edges, nodes, or both are weighted. The number of clusters can be specified by user or decided by the algorithm. Two most prominent types of objective functions are 1) the total weight of the edges that have endpoints in different clusters and 2) the total weight fo the edges that have endpoints in the same cluster. Depending on the meaning of the weights, these function are minimized or maximized. In either case, these objectives are meant to increase the homogeneity of clusters.  
-
-Several types of constraints are common to the graph partitioning problems. The most widely used constraint is the \emph{balance} constraint that requires the number of nodes in all clusters to be almost equal~\cite{LabbeO10}. Other types of constraints include constraint on the size of clusters~\cite{FanP10}, and constraints on total weight of nodes in a cluster~\cite{FerreiraMSWW98}. 
-
-The main difference of our problem with the existing problems is that the edges and nodes are not weighted. Instead, the properties of the desired clusters is specified by a set of soft \emph{can-not-link} constraints. This requires us to enforce the connectivity of clusters by means of extra constraints. The graph partitioning problem of \cite{Benati2017} also requires such constraints. However they do not assume that the number of clusters is given, and their encoding of the clustering problem is quite different from ours. 
 
 
 \section{conclusions and future work}
