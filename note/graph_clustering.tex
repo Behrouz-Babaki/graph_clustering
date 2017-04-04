@@ -418,12 +418,7 @@ between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: cuts to the
 linear relaxation were only added at the root node of the branch-and-cut tree.
 Moreover, when adding cuts to the relaxation, we monitored the change in
-the value of the objective function. If this value improved less than 5\% in 10 consecutive rounds, we stopped adding cuts. 
-%todo: wut
-Outside the root node, we called the separation problem only when a feasible solution was
-found.
-%todo: wut
-We normalized the two components of the objective function. We multiplied the size variable by $1/n$ in overlapping clustering and by $k/n$ in non-overlapping clustering. We divided the second component by the sum of edge weights.
+the value of the objective function. If this value improved less than 5\% in 10 consecutive rounds, we stopped adding cuts. Outside the root node, we only add cuts when an integer solution is found. We normalized the two components of the objective function. We multiplied the size variable by $1/n$ in overlapping clustering and by $k/n$ in non-overlapping clustering. We divided the second component by the sum of edge weights.
 
 
 The graphs used in our experiments were extracted from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application domain. Table \ref{table:instanceInformation} highlights some of the properties of our selected instances. Several of these instances contain a very low number of edges compared to nodes. As a direct result of this, they contain a very small number of paths. We have also selected a few graphs that contain more paths. These graphs also have a number high-degree nodes. Such hubs are fairly common in scale-free networks, of which protein-protein interaction networks are a common example.
