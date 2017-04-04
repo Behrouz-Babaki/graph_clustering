@@ -459,9 +459,7 @@ The code and the data will be made available upon publication of this paper.
 
 \subsection{Results and discussion}
 \subsubsection{Scalability of the two approaches}
-We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.1,0.25,0.33,0.5,1,2,3,4,5,10\}$. Table~\ref{table:runtime} shows the results. For the case of overlapping clusters we can see that in many cases the branch-and-cut approach is more efficient than using all paths.
-%the exception is instances \texttt{250\_750} and \texttt{350\_750} which \NDT{TODO: explanation}. 
-In case of branch-and-cut solving the non-overlapping problem setting is generally about as hard as the overlapping one, while for all paths it is considerably easier in a few case; exceptions on this are observed too though.
+We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.1,0.25,0.33,0.5,1,2,3,4,5,10\}$. Table~\ref{table:runtime} shows the results. In each instance, one of the algorithms outperforms the other one. This divides the instances into two groups. Instances for which enumerating all paths has a better performance are those which have a similar number of nodes and edges (see table~\ref{table:instanceInformation}). As a result, the total number of simple paths in these graphs is small and the optimization model has a reasonable size. On the other hand, for two of the instances the branch-and-cut method provides a clear advantage. The total number of simple paths for these instances is considerably larger than the others. Hence, for these instances the extra effort for solving the separation problem pays off.
 
 \subsubsection{Impact of $\gamma$}
 The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty. We showcase the effect of the parameter on these two components of the objective in Figure~\ref{fig:gamma} for instance \texttt{250\_750}. As $\gamma$ approaches $0$ most weight is given to the size leading to increasing larger minimum clusters but also a sharp incline in the total co-occurence penalty. For too high $\gamma$ values, $\geq 4$in this case, the size of the clusters can drop to values of 1 or 2, which are not meaningful. In this case, a $\gamma$ between 1 and 3 seems most sensible.
@@ -499,39 +497,39 @@ As explained in Section~\ref{sec:pareto} one can also use generic solvers to com
 \hline
 		 &   &  \multicolumn{2}{|c|}{\emph{overlapping}} & \multicolumn{2}{|c|}{\emph{non-overlapping}} \\
          \cline{3-6}
-\emph{instance} & \emph{k} &  \textbf{AllPaths} &  \textbf{BnC} &  \textbf{AllPaths} &  \textbf{BnC} \\
+\emph{instance} & \emph{k} &  \emph{AllPaths} &  \emph{BnC} &  \emph{AllPaths} &  \emph{BnC} \\
 \hline      
-\texttt{200\_1000} & 2 &       0.830 &    12.320 &       0.319 &    13.398 \\
-         & 3 &       3.211 &    16.255 &       4.474 &    15.007 \\
-         & 4 &      14.846 &    28.714 &      15.578 &    52.262 \\
+\texttt{200\_1000} & 2 &       \textbf{0.830} &    12.320 &      \textbf{0.319} &    13.398 \\
+         & 3 &       \textbf{3.211} &    16.255 &       \textbf{4.474} &    15.007 \\
+         & 4 &      \textbf{14.846} &    28.714 &      \textbf{15.578} &    52.262 \\
 \hline         
-\texttt{200\_1250} & 2 &     225.735 &    43.740 &     113.210 &    38.849 \\
-         & 3 &     582.541 &    52.950 &     298.390 &    72.643 \\
-         & 4 &         600 &   188.287 &     595.930 &   205.454 \\
+\texttt{200\_1250} & 2 &     225.735 &    \textbf{43.740} &     113.210 &    \textbf{38.849} \\
+         & 3 &     582.541 &    \textbf{52.950} &     298.390 &    \textbf{72.643} \\
+         & 4 &         -- &   \textbf{188.287} &     595.930 &   \textbf{205.454} \\
 \hline         
-\texttt{250\_1000} & 2 &     487.222 &    78.243 &     370.898 &    69.481 \\
-         & 3 &     587.700 &   121.677 &         600 &   217.079 \\
-         & 4 &         600 &   206.952 &         nan &       nan \\
+\texttt{250\_1000} & 2 &     487.222 &    \textbf{78.243} &     370.898 &    \textbf{69.481} \\
+         & 3 &     587.700 &   \textbf{121.677} &         -- &   \textbf{217.079} \\
+         & 4 &         -- &   \textbf{206.952} &         -- &       -- \\
 \hline         
-\texttt{250\_750} & 2 &       0.166 &     4.058 &       0.025 &     3.873 \\
-         & 3 &       0.321 &     6.433 &       0.387 &     3.965 \\
-         & 4 &       0.737 &    10.564 &       0.698 &     7.374 \\
+\texttt{250\_750} & 2 &       \textbf{0.166} &     4.058 &       \textbf{0.025} &     3.873 \\
+         & 3 &       \textbf{0.321} &     6.433 &       \textbf{0.387} &     3.965 \\
+         & 4 &       \textbf{0.737} &    10.564 &       \textbf{0.698} &     7.374 \\
 \hline         
-\texttt{300\_750} & 2 &       0.333 &    12.232 &       0.209 &    10.546 \\
-         & 3 &       0.761 &    20.365 &       0.812 &    16.924 \\
-         & 4 &       1.728 &    28.267 &       3.598 &    50.836 \\
+\texttt{300\_750} & 2 &       \textbf{0.333} &    12.232 &       \textbf{0.209} &    10.546 \\
+         & 3 &       \textbf{0.761} &    20.365 &       \textbf{0.812} &    16.924 \\
+         & 4 &       \textbf{1.728} &    28.267 &       \textbf{3.598} &    50.836 \\
 \hline         
-\texttt{350\_500} & 2 &       0.004 &     0.093 &       0.003 &     0.151 \\
-         & 3 &       0.006 &     0.129 &       0.021 &     0.257 \\
-         & 4 &       0.007 &     0.181 &       0.039 &     0.211 \\
+\texttt{350\_500} & 2 &       \textbf{0.004} &     0.093 &       \textbf{0.003} &     0.151 \\
+         & 3 &       \textbf{0.006} &     0.129 &       \textbf{0.021} &     0.257 \\
+         & 4 &       \textbf{0.007} &     0.181 &       \textbf{0.039} &     0.211 \\
 \hline         
-\texttt{350\_750} & 2 &       0.503 &    44.842 &       0.591 &    20.130 \\
-         & 3 &       1.971 &   113.311 &       2.016 &    58.417 \\
-         & 4 &       7.892 &   323.188 &       9.841 &   309.998 \\
+\texttt{350\_750} & 2 &       \textbf{0.503} &    44.842 &       \textbf{0.591} &    20.130 \\
+         & 3 &       \textbf{1.971} &   113.311 &       \textbf{2.016} &    58.417 \\
+         & 4 &       \textbf{7.892} &   323.188 &       \textbf{9.841} &   309.998 \\
 \hline         
-\texttt{450\_750} & 2 &       1.560 &   115.541 &       1.334 &    89.672 \\
-         & 3 &      10.686 &   361.855 &      12.655 &   320.706 \\
-         & 4 &      90.516 &   430.954 &      75.395 &       600 \\
+\texttt{450\_750} & 2 &       \textbf{1.560} &   115.541 &       \textbf{1.334} &    89.672 \\
+         & 3 &      \textbf{10.686} &   361.855 &      \textbf{12.655} &   320.706 \\
+         & 4 &      \textbf{90.516} &   430.954 &      \textbf{75.395} &       -- \\
 \hline
 \end{tabular}
 \end{table}
