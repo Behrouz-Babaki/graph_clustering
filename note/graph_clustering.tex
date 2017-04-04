@@ -163,8 +163,6 @@ f(V_1,\ldots,V_k) = min_{c=1}^{k} |V_c| - \gamma \sum_{c=1}^{k} \sum_{e \in G_o[
 \end{equation}
 The first component represents the size of the smallest cluster while the second component represents the sum of weighted edges in the induced subgraph of the co-occurence graph $G_o$ on the cluster $V_c$. $\gamma$ can be used to balance the size component to the co-occurence penalty computed and is assumed given.
 
-\NDB{Mention normalization (from Tias: as part of the construction of $G_o$, not as part of the problem definition)}
-
 %Consider a simple undirected graph $G=(V, E)$ where nodes represent genes, and edges represent interactions between those genes. Our goal is to partition $V$
 %into $k$ subsets (called \emph{clusters} from now on), such that the
 %subgraph induced by each subset is connected. These represent the pathways we seek to identify. Our preference is to avoid
@@ -246,11 +244,11 @@ To apply this modification to our formulation, we only need to replace constrain
 \end{equation}
 %
 \subsection{Breaking symmetries}
-Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two measures \NDT{this read 'options' but they are not (mutually excluding) options?} to reduce these symmetries: 1) assign label $1$ to the cluster that contains node $1$. 2) assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
+Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two measures to reduce these symmetries: 1) assign label $1$ to the cluster that contains node $1$. 2) assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
 %
 \begin{align}
 &x_{11} = 1 \\
-&\sum_{i=1}^{|V|} x_{ic} \leq \sum_{i=1}^{|V|} x_{i(c+1)} \qquad c \in \{1, \ldots, k-1\}
+&\sum_{i=1}^{|V|} x_{ic} \leq \sum_{i=1}^{|V|} x_{i(c+1)} \qquad c \in \{2, \ldots, k-1\}
 \end{align}
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
@@ -320,7 +318,9 @@ These constraints ensure there exists at least one path in the interaction graph
 \label{sec:bnc}
 
  In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution, a cut, is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given an assignment $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem.
- In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. \NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+ In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. 
+ 
+ %\NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
 
  A cutting plan approach with the formulation of connectivity from the previous section would require us to add both variables (the $y_rc$ ones) and constraints \eqref{cons:path} and \eqref{cons:pconnect} for each cut.
 % Applying the cutting plane method to the formulation of connectivity in the previous subsection is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}.
@@ -355,7 +355,7 @@ By translating this condition into linear constraints we can formulate the const
 %
 \begin{multline}
 \sum_{w \in S} x_{wc} \geq x_{uc} + x_{vc} - 1 \\
-\forall \forall (u, v) \in V, (u, v) \notin E, S \in \Gamma(u, v)
+\forall (u, v) \in V, (u, v) \notin E, S \in \Gamma(u, v)
 \label{eq:connectivity}
 \end{multline}
 
@@ -425,6 +425,8 @@ value improved less than 5\% for 10 consecutive rounds. Outside the root
 node, we called the separation problem only when a feasible solution was
 found.
 
+We normalized the two components of the objective function. We multiplied the size variable by $1/n$ in overlapping clustering and by $k/n$ in non-overlapping clustering. We divided the second component by the sum of edge weights.
+
 We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application.
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
 %
@@ -456,17 +458,17 @@ The code and the data will be made available upon publication of this paper.
 
 \subsection{Results and discussion}
 \subsubsection{Scalability of the two approaches}
-We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.1,0.25,0.33,0.5,1,2,3,4,5,10\}$. Table~\ref{table:runtime} shows the results. For the case of overlapping clusters we can see that in many cases the branch-and-cut approach is more efficient than using all paths; the exception is instances 250\_750 and 350\_750 which \NDT{TODO: explanation}. In case of branch-and-cut solving the non-overlapping problem setting is generally about as hard as the overlapping one, while for all paths it is considerably easier in a few case; exceptions on this are observed too though.
+We compare the runtime of the model formulation using all paths (ENUM) with that of using branch-and-cut (BNC), for a number of datasets and $k$ values and averaged over $\gamma\in\{0.1,0.25,0.33,0.5,1,2,3,4,5,10\}$. Table~\ref{table:runtime} shows the results. For the case of overlapping clusters we can see that in many cases the branch-and-cut approach is more efficient than using all paths; the exception is instances \texttt{250\_750} and \texttt{350\_750} which \NDT{TODO: explanation}. In case of branch-and-cut solving the non-overlapping problem setting is generally about as hard as the overlapping one, while for all paths it is considerably easier in a few case; exceptions on this are observed too though.
 
 \subsubsection{Impact of $\gamma$}
-The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty. We showcase the effect of the parameter on these two components of the objective in Figure~\ref{fig:gamma} for instance 250\_750. As $\gamma$ approaches $0$ most weight is given to the size leading to increasing larger minimum clusters but also a sharp incline in the total co-occurence penalty. For too high $\gamma$ values, $\geq 4$in this case, the size of the clusters can drop to values of 1 or 2, which are not meaningful. In this case, a $\gamma$ between 1 and 3 seems most sensible.
+The $\gamma$ parameter is a way of balancing the minimum size of the clusters with the total co-occurrence penalty. We showcase the effect of the parameter on these two components of the objective in Figure~\ref{fig:gamma} for instance \texttt{250\_750}. As $\gamma$ approaches $0$ most weight is given to the size leading to increasing larger minimum clusters but also a sharp incline in the total co-occurence penalty. For too high $\gamma$ values, $\geq 4$in this case, the size of the clusters can drop to values of 1 or 2, which are not meaningful. In this case, a $\gamma$ between 1 and 3 seems most sensible.
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.25]{images/gamma_smallest_cluster_size}
 \includegraphics[scale=0.25]{images/gamma_total_penalty_incurred}
 \captionsetup{font=small}
-\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \emph{250\_750}.}
+\caption{impact of $\gamma$ on smallest cluster size (left) and total co-occurrence penalty (right) for instance \texttt{250\_750}.}
 \label{fig:gamma}
 \end{figure}
 
@@ -477,7 +479,7 @@ As explained in Section~\ref{sec:pareto} one can also use generic solvers to com
 \centering
 \includegraphics[scale=0.5]{images/pareto}
 \captionsetup{font=small}
-\caption{The Pareto optimal set for overlapping clustering on instance \emph{250\_750} with three values for number of clusters.}
+\caption{The Pareto optimal set for overlapping clustering on instance \texttt{250\_750} with three values for number of clusters.}
 \label{fig:pareto}
 \end{figure}
 
@@ -496,43 +498,43 @@ As explained in Section~\ref{sec:pareto} one can also use generic solvers to com
          \cline{3-6}
 \emph{instance} & \emph{k} &  \textbf{AllPaths} &  \textbf{BnC} &  \textbf{AllPaths} &  \textbf{BnC} \\
 \hline      
-200\_1000 & 2 &     247.5 &    11.8 &       0.3 &    13.3 \\
+\texttt{200\_1000} & 2 &     247.5 &    11.8 &       0.3 &    13.3 \\
          & 3 &     248.9 &    18.1 &       4.4 &    15.0 \\
          & 4 &     255.7 &    29.1 &      15.5 &    52.2 \\
 % Dries does not have the package for dashed lines         
 %\hdashline[.4pt/1pt]                              
 \hline
-200\_1250 & 2 &     269.8 &    45.2 &     121.7 &    38.3 \\
+\texttt{200\_1250} & 2 &     269.8 &    45.2 &     121.7 &    38.3 \\
          & 3 &     564.5 &    54.1 &     300.8 &    65.1 \\
          & 4 &         600.0  &   167.4 &     592.1 &   204.1 \\
 %\hdashline[.4pt/1pt] 
 \hline                             
-250\_1000 & 2 &     502.3 &    75.9 &     320.6 &    64.5 \\
+\texttt{250\_1000} & 2 &     502.3 &    75.9 &     320.6 &    64.5 \\
          & 3 &     592.7 &   114.7 &     600.0       &   204.1 \\
          & 4 &         600.0  &   200.8 &         600.0   &       600.0   \\
 %\hdashline[.4pt/1pt]                              
 \hline
-250\_750 & 2 &       0.1 &     4.0 &       0.1 &     4.0 \\
+\texttt{250\_750} & 2 &       0.1 &     4.0 &       0.1 &     4.0 \\
          & 3 &       0.3 &     6.8 &       0.4 &     4.2 \\
          & 4 &       600.0    &    10.6 &       0.6 &     7.8 \\
 %\hdashline[.4pt/1pt]                              
 \hline
-300\_750 & 2 &     247.2 &    12.6 &     247.1 &    10.3 \\
+\texttt{300\_750} & 2 &     247.2 &    12.6 &     247.1 &    10.3 \\
          & 3 &     247.5 &    19.5 &     247.5 &    18.3 \\
          & 4 &     248.0 &    29.5 &     249.1 &    53.4 \\
 %\hdashline[.4pt/1pt]                              
 \hline
-350\_500 & 2 &     247.0 &     0.1 &       0.1 &     0.1 \\
+\texttt{350\_500} & 2 &     247.0 &     0.1 &       0.1 &     0.1 \\
          & 3 &     247.0 &     0.1 &       0.1 &     0.2 \\
          & 4 &     247.0 &     0.1 &       0.1 &     0.2 \\
 %\hdashline[.4pt/1pt]                              
 \hline
-350\_750 & 2 &       0.4 &    43.0 &       0.5 &    19.7 \\
+\texttt{350\_750} & 2 &       0.4 &    43.0 &       0.5 &    19.7 \\
          & 3 &       1.8 &    95.0 &       2.0 &    57.1 \\
          & 4 &       7.2 &   303.8 &       9.2 &   335.1 \\
 %\hdashline[.4pt/1pt]                              
 \hline
-450\_750 & 2 &     247.9 &   120.7 &     247.8 &    92.7 \\
+\texttt{450\_750} & 2 &     247.9 &   120.7 &     247.8 &    92.7 \\
          & 3 &     253.3 &   286.7 &     148.1 &   316.1 \\
          & 4 &     260.3 &   356.8 &      75.3 &       600.0  \\
 \hline
