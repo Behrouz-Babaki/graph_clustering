@@ -20,6 +20,9 @@
 \newcommand{\NDB}[1]{\todo[bordercolor=mhue,linecolor=mhue,color=mhue!40]{Behrouz: #1}}
 \newcommand{\NDBi}[1]{\todo[inline,bordercolor=mhue,color=mhue!40]{Behrouz: #1}}
 
+\DeclareRobustCommand*{\IEEEauthorrefmark}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\textsuperscript{\footnotesize\ensuremath{#1}}}}
+
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 
@@ -31,14 +34,14 @@
   \IEEEauthorblockN{
     Behrouz Babaki\IEEEauthorrefmark{1}, 
     Dries Van Daele\IEEEauthorrefmark{1}, 
-    Bram Weytjens\IEEEauthorrefmark{2} and
-    Tias Guns\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
+    Bram Weytjens\IEEEauthorrefmark{2,3,4,5}
+    Tias Guns\IEEEauthorrefmark{1,6}}
     \IEEEauthorblockA{\IEEEauthorrefmark{1}Department of Computer Science, KU Leuven, Belgium}
-    \IEEEauthorblockA{\IEEEauthorrefmark{2}Department of Microbial and Molecular Systems, KU Leuven, Belgium \\
-\& Department of Plant Biotechnology and Bioinformatics, UGent, Belgium\\
-\& Bioinformatics Institute Ghent, Belgium\\
-\& Department of Information Technology, IDLab, UGent, Belgium}
-  \IEEEauthorblockA{\IEEEauthorrefmark{3}Department of Business technology and Operations, VUB, Belgium}
+    \IEEEauthorblockA{\IEEEauthorrefmark{2}Department of Microbial and Molecular Systems, KU Leuven, Belgium}
+    \IEEEauthorblockA{\IEEEauthorrefmark{3}Department of Plant Biotechnology and Bioinformatics, UGent, Belgium}
+    \IEEEauthorblockA{\IEEEauthorrefmark{4}Bioinformatics Institute Ghent, Belgium}
+    \IEEEauthorblockA{\IEEEauthorrefmark{5}Department of Information Technology, IDLab, UGent, Belgium}
+    \IEEEauthorblockA{\IEEEauthorrefmark{6}Department of Business Technology and Operations, VUB, Belgium}
 }
 
 
@@ -425,7 +428,7 @@ found.
 We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application.
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
 %
-Table \ref{table:instanceInformation} highlights some of the variety in our selected instances.
+Table \ref{table:instanceInformation} highlights some of the properties of our selected instances.
 
 \begin{table}
 \centering
@@ -563,8 +566,7 @@ Based on these results, and the observations from figure \ref{fig:plot_clusters_
 
 \section{conclusions and future work}
 \label{sec:conclusion}
-Motivated by a problem in bio-informatics, we presented a novel graph clustering problem involving two graphs, a co-occurrence graph whose weighted edges are part of the objective function, and an interaction graph with hard connectivity constraints. We propose to methods for handling the (potentially exponential in number) connectivity constraints, one based on all simple paths and a cutting plane approach. We also present a number of extensions such as a bi-objective Pareto optimisation method to balance minimum cluster size and total penalty. Computational experiments show the properties of the different proposed method, and a validation experiment on a separate biological data source demonstrates the potential of our proposed approach.
-
+Motivated by a problem in bio-informatics, we presented a novel graph clustering problem involving two graphs, a co-occurrence graph whose weighted edges are part of the objective function, and an interaction graph with hard connectivity constraints. We propose two methods for handling the (potentially exponential in number) connectivity constraints, one based on enumerating all simple paths and the other being a cutting plane approach. We also present a number of extensions such as a bi-objective Pareto optimisation method to balance minimum cluster size and total penalty. Computational experiments show the properties of the different proposed methods, and a validation experiment on a separate biological data source demonstrates the potential of our proposed approach.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
