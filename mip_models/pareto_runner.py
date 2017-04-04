@@ -94,12 +94,10 @@ if __name__ == '__main__':
     print('number of clusters:%d'%k)
     print('largest possible minsize bound:%d\n'%(n_vertices//k))    
     
-    print('smallest given bound:%d'%lower)
-    print('largest given bound:%d\n'%upper)
     
     print('bound,size,violations')
 
-    minsize_bound = lower
+    minsize_bound = 0
     done = False
     while not done:
         kwargs['minsize'] = minsize_bound
@@ -113,5 +111,4 @@ if __name__ == '__main__':
             minsize = min(len(cluster) for cluster in m.clusters)
             print('%d,%d,%f'%(minsize_bound, minsize, m.objective))
             minsize_bound = minsize + 1
-            done = (minsize_bound > upper)
 
