@@ -160,8 +160,6 @@ f(V_1,\ldots,V_k) = min_{c=1}^{k} |V_c| - \gamma \sum_{c=1}^{k} \sum_{e \in G_o[
 \end{equation}
 The first component represents the size of the smallest cluster while the second component represents the sum of weighted edges in the induced subgraph of the co-occurence graph $G_o$ on the cluster $V_c$. $\gamma$ can be used to balance the size component to the co-occurence penalty computed and is assumed given.
 
-\NDB{Mention normalization (from Tias: as part of the construction of $G_o$, not as part of the problem definition)}
-
 %Consider a simple undirected graph $G=(V, E)$ where nodes represent genes, and edges represent interactions between those genes. Our goal is to partition $V$
 %into $k$ subsets (called \emph{clusters} from now on), such that the
 %subgraph induced by each subset is connected. These represent the pathways we seek to identify. Our preference is to avoid
@@ -243,11 +241,11 @@ To apply this modification to our formulation, we only need to replace constrain
 \end{equation}
 %
 \subsection{Breaking symmetries}
-Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two measures \NDT{this read 'options' but they are not (mutually excluding) options?} to reduce these symmetries: 1) assign label $1$ to the cluster that contains node $1$. 2) assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
+Clustering problems often have an inherent symmetry which is due to the fact that the labels of clusters are arbitrary. This means that for each solution, there are $k!$ equivalent solutions that only differ by the cluster labels. We can strengthen our formulation by breaking these symmetries. \cite{SheraliD05a} suggests two measures to reduce these symmetries: 1) assign label $1$ to the cluster that contains node $1$. 2) assign labels to other clusters in the increasing order of their sizes. This translates to the following constraints:
 %
 \begin{align}
 &x_{11} = 1 \\
-&\sum_{i=1}^{|V|} x_{ic} \leq \sum_{i=1}^{|V|} x_{i(c+1)} \qquad c \in \{1, \ldots, k-1\}
+&\sum_{i=1}^{|V|} x_{ic} \leq \sum_{i=1}^{|V|} x_{i(c+1)} \qquad c \in \{2, \ldots, k-1\}
 \end{align}
 
 These constraints do not eliminate all symmetries (especially in the case of overlapping clusters) but still lead to improvements in performance in practice. 
@@ -317,7 +315,9 @@ These constraints ensure there exists at least one path in the interaction graph
 \label{sec:bnc}
 
  In the cutting plane method two steps are iteratively repeated: 1) A model that includes only a subset of the constraints is solved. 2) A constraint that is violated by the current solution, a cut, is added to the model. These steps are repeated until no constraint is violated. To use the cutting plane algorithm, we need an oracle that given an assignment $\mathbf{x}$ can check if $\mathbf{x}$ satisfies all constraints and if not, finds a constraint that is violated by $\mathbf{x}$. Since in the latter case the added constraint separates $\mathbf{x}$ from the feasible region, the problem solved by the oracle is called the \emph{separation} problem.
- In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. \NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
+ In a \emph{branch and cut} algorithm, cutting planes are added throughout the branch and bound tree. 
+ 
+ %\NDT{removed a sentence about LP relaxation, too early and I don't get it ; )} %Note that even if we add some or none of the cuts to the linear programming (LP) relaxation, it will still provide a valid bound. Hence it is possible to add the cuts only when an integer solution is obtained.
 
  A cutting plan approach with the formulation of connectivity from the previous section would require us to add both variables (the $y_rc$ ones) and constraints \eqref{cons:path} and \eqref{cons:pconnect} for each cut.
 % Applying the cutting plane method to the formulation of connectivity in the previous subsection is not easy, since the $y$ variables in a constraint from the constraint set~\ref{cons:pconnect} couple it with an exponential number of constraints from the constraint set~\ref{cons:path}.
