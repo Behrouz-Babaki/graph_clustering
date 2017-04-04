@@ -397,8 +397,28 @@ found.
 We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application.
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
 %
-\NDTi{for Behrouz: something about the data}
+Table \ref{table:instanceInformation} highlights some of the variety in our selected instances.
 
+\begin{table}
+\centering
+\captionsetup{font=small}
+\captionof{table}{instance properties}
+\label{table:instanceInformation}
+\begin{tabular}{|l c c r|}
+\hline
+instance & number of cycle-free paths & number of nodes & number of edges\\
+\hline
+200\_1000 & 93 & 40 & 46\\
+200\_1250 & 1508 & 52 & 68\\
+250\_750 & 45 & 30 & 32\\
+250\_1000 & 1040 & 69 & 81\\
+300\_750 & 59 & 44 & 46\\
+350\_500 & 12 & 13 & 12\\
+350\_750 & 73 & 58 & 60\\
+450\_750 & 105 & 90 & 92\\
+\hline
+\end{tabular}
+\end{table}
 
 
 The code and the data will be made available upon publication of this paper.
