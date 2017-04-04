@@ -406,31 +406,32 @@ It is shown in~\cite{CarvajalCGVW13} that the solution for equation~\ref{eq:sepa
 %
 %
 %\subsection{Experiment setting}
-We ran experiments on quad-core Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the python interface
+We ran experiments on quad-core Linux machines with 32 GB of memory. We implemented our branch-and-cut algorithm using the Python interface
 of \emph{Gurobi-7}\footnote{www.gurobi.com} and allowed it to use all 4 cores.
 
-To solve the separation problem, we used the min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. To use this algorithm we replaced
-each undirected edge by two opposite directed edges. The capacity of
-these edges is infinite. Then we replaced each node $v$ by two
-nodes $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
+To solve the separation problem, we used the min-cut/max-flow algorithm from the \emph{NetworkX-1.11} library~\cite{NetworkX}. In order to use this algorithm, we first replaced
+each undirected edge by two opposite directed edges of infinite capacity.
+Then, we replaced each node $v$ by two nodes $v_{\text{in}}, v_{\text{out}}$ connected by two opposite
 edges, with capacities equal to the capacity of $v$. We obtain the
 minimum node cut separating $u$ and $v$ by computing the minimum cut
 between $u_{\text{out}}$ and $v_{\text{in}}$ in this graph.
 
-We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: we added cuts to the
-linear relaxation only at the root node of the branch-and-cut tree.
+We followed the recipe of~\cite{CarvajalCGVW13} for adding the cuts: cuts to the
+linear relaxation were only added at the root node of the branch-and-cut tree.
 Moreover, when adding cuts to the relaxation, we monitored the change in
-the value of objective function, and stopped adding the cuts if this
-value improved less than 5\% for 10 consecutive rounds. Outside the root
-node, we called the separation problem only when a feasible solution was
+the value of the objective function. If this value improved less than 5\% in 10 consecutive rounds, we stopped adding cuts. 
+%todo: wut
+Outside the root node, we called the separation problem only when a feasible solution was
 found.
-
+%todo: wut
 We normalized the two components of the objective function. We multiplied the size variable by $1/n$ in overlapping clustering and by $k/n$ in non-overlapping clustering. We divided the second component by the sum of edge weights.
 
-We extracted the graphs used in our experiments from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application.
+The graphs used in our experiments were extracted from the HINT+HI2012 protein-protein interaction network~\cite{das2012hint,yu2011next}. We consider this selection of subgraphs representative of the graphs encountered in our application domain. Table \ref{table:instanceInformation} highlights some of the properties of our selected instances. Several graphs have a very low number of edges compared to nodes. As a result, they are essentially trees, and thus contain a very small number of paths. We have also selected a few graphs that contain more paths. These graphs also have a number high-degree nodes. Such hubs are fairly common in scale-free networks, of which protein-protein interaction networks are a common example.
+
+
 %cite (High-quality protein interactomes and their applications in understanding human disease.  and Next-generation sequencing to generate interactome datasets. )
 %
-Table \ref{table:instanceInformation} highlights some of the properties of our selected instances.
+
 
 \begin{table}
 \centering
